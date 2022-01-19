@@ -1,0 +1,348 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a101d46b-822e-4ef2-921b-2ac63133a320')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a101d46b-822e-4ef2-921b-2ac63133a320')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - Command executed with the highest privileges by new user",
+                "description": "Detects command execution with PrivilegeLevel - 15 by user for wich there was no such activity detected earlier.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbperiod = 60d;\nlet lbtime = 15m;\nlet knownPrivUsers =\nCiscoISEEvent\n| where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n| where PrivilegeLevel == '15'\n| summarize makelist(DstUserName)\n;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where PrivilegeLevel == '15'\n| where DstUserName !in (knownPrivUsers)\n| project TimeGenerated, SrcIpAddr, DstIpAddr, DstUserName, CmdSet\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT5M",
+                "queryPeriod": "PT5M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "Persistence",
+                    "PrivilegeEscalation",
+                    "DefenseEvasion",
+                    "Execution"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b2d2c6c0-9a75-4c95-9df6-69a745a7bc48')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b2d2c6c0-9a75-4c95-9df6-69a745a7bc48')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - Device PostureStatus changed to non-compliant",
+                "description": "Detects when device changes PostureStatus from \"Compliant\".",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime_48h = 48h;\nlet lbtime_24h = 24h;\nlet lbtime_now = now();\nlet compliantIPs = CiscoISEEvent\n| where TimeGenerated between (ago(lbtime_48h) .. ago(lbtime_24h))\n| where PostureStatus == 'Compliant'\n| summarize makelist(DstIpAddr)\n;\nCiscoISEEvent\n| where TimeGenerated between (ago(lbtime_24h) .. lbtime_now)\n| where PostureStatus != 'Compliant'\n| where DstIpAddr in (compliantIPs)\n| project DstIpAddr\n| extend IPCustomEntity = DstIpAddr\n",
+                "queryFrequency": "PT15M",
+                "queryPeriod": "PT15M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d97593fb-5e84-4f63-9df0-3b6261216e36')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d97593fb-5e84-4f63-9df0-3b6261216e36')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE -  Command executed with the highest privileges from new IP",
+                "description": "Detects command execution with PrivilegeLevel - 15 from new source.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbperiod = 60d;\nlet lbtime = 15m;\nlet knownAdminIpList =\nCiscoISEEvent\n| where TimeGenerated between (ago(lbperiod) .. ago(lbtime))\n| where PrivilegeLevel == '15'\n| summarize makelist(SrcIpAddr)\n;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where PrivilegeLevel == '15'\n| where SrcIpAddr !in (knownAdminIpList)\n| project TimeGenerated, SrcIpAddr, DstIpAddr, DstUserName, CmdSet\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT5M",
+                "queryPeriod": "PT5M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "Persistence",
+                    "PrivilegeEscalation",
+                    "DefenseEvasion",
+                    "Execution"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c76b11d5-542d-4725-b9fa-a18887e5f1c2')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c76b11d5-542d-4725-b9fa-a18887e5f1c2')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - Certificate has expired",
+                "description": "Detects certificate expiration.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 1h;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where EventId == '60167'\n| project SrcIpAddr, DvcIpAddr, DvcHostname, DstUserName\n| extend HostCustomEntity = DvcHostname\n| extend IPCustomEntity = SrcIpAddr\n| extend AccountCustomEntity = DstUserName\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/821809c7-81d0-4b96-ba9b-2c436f9e2856')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/821809c7-81d0-4b96-ba9b-2c436f9e2856')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - Backup failed",
+                "description": "Detects when backup activity failed.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 6h;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where EventId in ('60095', '60098')\n| project TimeGenerated, DvcHostname, DvcIpAddr\n| extend HostCustomEntity = DvcHostname\n| extend IPCustomEntity = DvcIpAddr\n",
+                "queryFrequency": "PT6H",
+                "queryPeriod": "PT6H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/97fce973-3e0d-4233-a80e-a4cd0ab9dd9e')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/97fce973-3e0d-4233-a80e-a4cd0ab9dd9e')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - ISE administrator password has been reset",
+                "description": "Detects when the ISE administrator password has been reset.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 5m;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where EventId == '58019'\n| project TimeGenerated, SrcIpAddr, DstUserName\n| extend AccountCustomEntity = DstUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT5M",
+                "queryPeriod": "PT5M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "Persistence",
+                    "PrivilegeEscalation",
+                    "DefenseEvasion"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/f16a0979-787f-4402-904c-8e046614d265')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/f16a0979-787f-4402-904c-8e046614d265')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - Log files deleted",
+                "description": "Detects log file deleting activity.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 5m;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where EventId in ('58015', '59101', '59102')\n| project TimeGenerated, DvcHostname, DvcIpAddr, DstUserName\n| extend HostCustomEntity = DvcHostname\n| extend IPCustomEntity = DvcIpAddr\n| extend AccountCustomEntity = DstUserName\n",
+                "queryFrequency": "PT5M",
+                "queryPeriod": "PT5M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "DefenseEvasion"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8c2b56d6-338f-4a92-9f9b-bd28ec68c507')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8c2b56d6-338f-4a92-9f9b-bd28ec68c507')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "CiscoISE - Attempt to delete local store logs",
+                "description": "Detects when attempt to delete local store logs failed.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 5m;\nCiscoISEEvent\n| where TimeGenerated > ago(lbtime)\n| where EventId == '59103'\n| project TimeGenerated, DvcHostname, DvcIpAddr, DstUserName\n| extend HostCustomEntity = DvcHostname\n| extend IPCustomEntity = DvcIpAddr\n| extend AccountCustomEntity = DstUserName\n",
+                "queryFrequency": "PT5M",
+                "queryPeriod": "PT5M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "DefenseEvasion"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        }
+    ]
+}

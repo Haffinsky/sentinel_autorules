@@ -1,0 +1,257 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/30e42af5-84d0-433d-8374-8484a7200b47')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/30e42af5-84d0-433d-8374-8484a7200b47')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "GCP IAM - High privileged role added to service account",
+                "description": "Detects when high privileged role was added to service account.",
+                "severity": "High",
+                "enabled": false,
+                "query": "let privileged_roles = dynamic(['roles/iam.securityAdmin', 'roles/secretmanager.admin', 'roles/secretmanager.secretAccessor', 'roles/apigateway.admin', 'roles/logging.admin', 'roles/iam.organizationRoleAdmin', 'roles/iam.roleAdmin', 'roles/iam.serviceAccountAdmin', 'roles/iam.serviceAccountCreator', 'roles/iam.serviceAccountKeyAdmin']);\nGCP_IAM\n| where PayloadMethodname =~ 'SetIamPolicy'\n| extend action = parse_json(todynamic(PayloadServicedataPolicydeltaBindingdeltas))[0]['action']\n| where action =~ 'ADD'\n| extend role = parse_json(todynamic(PayloadServicedataPolicydeltaBindingdeltas))[0]['role']\n| where role in~ (privileged_roles)\n| project-away action\n| extend timestamp = TimeGenerated, AccountCustomEntity = PayloadAuthenticationinfoPrincipalemail, IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT15M",
+                "queryPeriod": "PT15M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/bac0b44e-976c-477c-906e-31f86e3e9902')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bac0b44e-976c-477c-906e-31f86e3e9902')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "GCP IAM - Publicly exposed storage bucket",
+                "description": "Detects possible misconfiguration for bucket policy making it publicly available.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "GCP_IAM\n| where PayloadMethodname =~ 'google.iam.v1.IAMPolicy.SetIamPolicy'\n| where ResourceType has 'bucket'\n| extend members = parse_json(todynamic(PayloadRequestPolicyBindings))[0]['members']\n| extend action = parse_json(todynamic(PayloadRequestPolicyBindings))[0]['action']\n| where members in~ ('allUsers', 'allAuthenticatedUsers')\n| where action =~ 'ADD'\n| extend timestamp = TimeGenerated, AccountCustomEntity = PayloadAuthenticationinfoPrincipalemail, IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Discovery"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0698415f-6827-450e-b6f5-dfe085c229dd')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0698415f-6827-450e-b6f5-dfe085c229dd')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "GCP IAM - Disable Data Access Logging",
+                "description": "Detects when Data Access Logging is disabled.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "GCP_IAM\n| where PayloadMethodname == 'SetIamPolicy'\n| extend s = parse_json(todynamic(PayloadRequestPolicyAuditconfigs))[0]['auditLogConfigs']\n| where isempty(s)\n| extend timestamp = TimeGenerated, AccountCustomEntity = PayloadAuthenticationinfoPrincipalemail, IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "DefenseEvasion"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/31077cdb-4acb-4aaa-bd95-47819b9d136a')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/31077cdb-4acb-4aaa-bd95-47819b9d136a')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "GCP IAM - Empty user agent",
+                "description": "Detects requests where user agent is empty.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "GCP_IAM\n| where isempty(HttpUserAgentOriginal)\n| extend timestamp = TimeGenerated, AccountCustomEntity = PayloadAuthenticationinfoPrincipalemail, IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "DefenseEvasion"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/8283f931-4d34-41e1-a4ee-bc0466af3c2c')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/8283f931-4d34-41e1-a4ee-bc0466af3c2c')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "GCP IAM - Privileges Enumeration",
+                "description": "Detects possible privileges enumeration.",
+                "severity": "Low",
+                "enabled": false,
+                "query": "let threshold = 5;\nGCP_IAM\n| where PayloadMethodname =~ 'google.iam.admin.v1.ListRoles'\n| summarize count() by PayloadAuthenticationinfoPrincipalemail, bin(TimeGenerated, 1h)\n| where count_ > threshold\n| extend AccountCustomEntity = PayloadAuthenticationinfoPrincipalemail\n",
+                "queryFrequency": "PT12H",
+                "queryPeriod": "PT12H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Discovery"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d7b44cab-9386-49ee-8263-86ea84e36358')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d7b44cab-9386-49ee-8263-86ea84e36358')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "GCP IAM - New Authentication Token for Service Account",
+                "description": "Detects when new authentication token is created for service account.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "GCP_IAM\n| where PayloadMethodname =~ 'google.iam.admin.v1.GenerateAccessToken'\n| extend result = parse_json(todynamic(PayloadAuthorizationinfo))[0]['granted']\n| where result =~ 'true'\n| extend service_account = extract(@'serviceAccounts\\/(.*?)@', 1, PayloadResponseName)\n| project-away result\n| extend timestamp = TimeGenerated, AccountCustomEntity = service_account, IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "LateralMovement"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        }
+    ]
+}

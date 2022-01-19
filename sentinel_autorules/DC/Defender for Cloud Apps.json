@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ba98e156-07a4-43bf-ba09-1dda491c8908')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ba98e156-07a4-43bf-ba09-1dda491c8908')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "MicrosoftSecurityIncidentCreation",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Create incidents based on Microsoft Cloud App Security alerts",
+                "description": "Create incidents based on all alerts generated in Microsoft Cloud App Security",
+                "enabled": true,
+                "productFilter": "Microsoft Cloud App Security",
+                "severitiesFilter": null,
+                "displayNamesFilter": null,
+                "displayNamesExcludeFilter": null,
+                "alertRuleTemplateName": "b3cfc7c0-092c-481c-a55b-34a3979758cb"
+            }
+        }
+    ]
+}

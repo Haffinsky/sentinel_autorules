@@ -1,0 +1,417 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/4f18af85-756b-44b0-b793-d1e56bd0fdfd')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/4f18af85-756b-44b0-b793-d1e56bd0fdfd')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Exchange SSRF Autodiscover ProxyShell - Detection",
+                "description": "This query looks for suspicious request patterns to Exchange servers that fit patterns recently\nblogged about by PeterJson. This exploitation chain utilises an SSRF vulnerability in Exchange\nwhich eventually allows the attacker to execute arbitrary Powershell on the server. In the example\npowershell can be used to write an email to disk with an encoded attachment containing a shell.\nReference: https://peterjson.medium.com/reproducing-the-proxyshell-pwn2own-exploit-49743a4ea9a1",
+                "severity": "High",
+                "enabled": true,
+                "query": "let successCodes = dynamic([200, 302, 401]);\nW3CIISLog\n| where scStatus has_any (successCodes)\n| where ipv4_is_private(cIP) == False\n| where csUriStem hasprefix \"/autodiscover/autodiscover.json\"\n| project TimeGenerated, cIP, sIP, sSiteName, csUriStem, csUriQuery, Computer, csUserName, _ResourceId, FileUri\n| where (csUriQuery !has \"Protocol\" and isnotempty(csUriQuery))\nor (csUriQuery has_any(\"/mapi/\", \"powershell\"))\nor (csUriQuery contains \"@\" and csUriQuery matches regex @\"\\.[a-zA-Z]{2,4}?(?:[a-zA-Z]{2,4}\\/)\")\nor (csUriQuery contains \":\" and csUriQuery matches regex @\"\\:[0-9]{2,4}\\/\")\n| extend timestamp = TimeGenerated, HostCustomEntity = Computer, IPCustomEntity = cIP, AccountCustomEntity = csUserName, ResourceCustomEntity = _ResourceId, FileCustomEntity = FileUri",
+                "queryFrequency": "PT4H",
+                "queryPeriod": "PT4H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "968358d6-6af8-49bb-aaa4-187b3067fb95",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "AzureResource",
+                        "fieldMappings": [
+                            {
+                                "identifier": "ResourceId",
+                                "columnName": "ResourceCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/4ad280a1-1e73-407f-add2-bdb9ec45368b')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/4ad280a1-1e73-407f-add2-bdb9ec45368b')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "SUPERNOVA webshell",
+                "description": "Identifies SUPERNOVA webshell based on W3CIISLog data.\n References:\n - https://unit42.paloaltonetworks.com/solarstorm-supernova/",
+                "severity": "High",
+                "enabled": true,
+                "query": "W3CIISLog\n| where csMethod == 'GET'\n| where isnotempty(csUriStem) and isnotempty(csUriQuery)\n| where csUriStem contains \"logoimagehandler.ashx\"\n| where csUriQuery contains \"codes\" and csUriQuery contains \"clazz\" and csUriQuery contains \"method\" and csUriQuery contains \"args\"\n| extend timestamp = TimeGenerated, IPCustomEntity = cIP, HostCustomEntity = Computer, AccountCustomEntity = csUserName",
+                "queryFrequency": "PT4H",
+                "queryPeriod": "PT4H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Persistence",
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "2acc91c3-17c2-4388-938e-4eac2d5894e8",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/08acb928-d9c1-4309-8522-0094d74da1f0')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/08acb928-d9c1-4309-8522-0094d74da1f0')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "HAFNIUM Suspicious Exchange Request",
+                "description": "This query looks for suspicious request patterns to Exchange servers that fit a pattern observed by HAFNIUM actors.\nThe same query can be run on HTTPProxy logs from on-premise hosted Exchange servers.\nReference: https://www.microsoft.com/security/blog/2021/03/02/hafnium-targeting-exchange-servers/",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let exchange_servers = (\nW3CIISLog\n| where TimeGenerated > ago(14d)\n| where sSiteName =~ \"Exchange Back End\"\n| summarize by Computer);\nW3CIISLog\n| where TimeGenerated > ago(1d)\n| where Computer in (exchange_servers)\n| where csUriQuery startswith \"t=\"\n| project-reorder TimeGenerated, Computer, csUriStem, csUriQuery, csUserName, csUserAgent, cIP\n| extend timestamp = TimeGenerated, AccountCustomEntity = csUserName, HostCustomEntity = Computer, IPCustomEntity = cIP",
+                "queryFrequency": "P1D",
+                "queryPeriod": "P14D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "23005e87-2d3a-482b-b03d-edbebd1ae151",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a781b425-6d0a-43c1-bd9d-0377a3ddd772')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a781b425-6d0a-43c1-bd9d-0377a3ddd772')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "High count of connections by client IP on many ports",
+                "description": "Identifies when 30 or more ports are used for a given client IP in 10 minutes occurring on the IIS server.\nThis could be indicative of attempted port scanning or exploit attempt at internet facing web applications.  \nThis could also simply indicate a misconfigured service or device.\nReferences:\nIIS status code mapping - https://support.microsoft.com/help/943891/the-http-status-code-in-iis-7-0-iis-7-5-and-iis-8-0\nWin32 Status code mapping - https://msdn.microsoft.com/library/cc231199.aspx",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let timeBin = 10m;\nlet portThreshold = 30;\nW3CIISLog\n| extend scStatusFull = strcat(scStatus, \".\",scSubStatus) \n// Map common IIS codes\n| extend scStatusFull_Friendly = case(\nscStatusFull == \"401.0\", \"Access denied.\",\nscStatusFull == \"401.1\", \"Logon failed.\",\nscStatusFull == \"401.2\", \"Logon failed due to server configuration.\",\nscStatusFull == \"401.3\", \"Unauthorized due to ACL on resource.\",\nscStatusFull == \"401.4\", \"Authorization failed by filter.\",\nscStatusFull == \"401.5\", \"Authorization failed by ISAPI/CGI application.\",\nscStatusFull == \"403.0\", \"Forbidden.\",\nscStatusFull == \"403.4\", \"SSL required.\",\n\"See - https://support.microsoft.com/help/943891/the-http-status-code-in-iis-7-0-iis-7-5-and-iis-8-0\")\n// Mapping to Hex so can be mapped using website in comments above\n| extend scWin32Status_Hex = tohex(tolong(scWin32Status)) \n// Map common win32 codes\n| extend scWin32Status_Friendly = case(\nscWin32Status_Hex =~ \"775\", \"The referenced account is currently locked out and cannot be logged on to.\",\nscWin32Status_Hex =~ \"52e\", \"Logon failure: Unknown user name or bad password.\",\nscWin32Status_Hex =~ \"532\", \"Logon failure: The specified account password has expired.\",\nscWin32Status_Hex =~ \"533\", \"Logon failure: Account currently disabled.\", \nscWin32Status_Hex =~ \"2ee2\", \"The request has timed out.\", \nscWin32Status_Hex =~ \"0\", \"The operation completed successfully.\", \nscWin32Status_Hex =~ \"1\", \"Incorrect function.\", \nscWin32Status_Hex =~ \"2\", \"The system cannot find the file specified.\", \nscWin32Status_Hex =~ \"3\", \"The system cannot find the path specified.\", \nscWin32Status_Hex =~ \"4\", \"The system cannot open the file.\", \nscWin32Status_Hex =~ \"5\", \"Access is denied.\", \nscWin32Status_Hex =~ \"8009030e\", \"SEC_E_NO_CREDENTIALS\", \nscWin32Status_Hex =~ \"8009030C\", \"SEC_E_LOGON_DENIED\", \n\"See - https://msdn.microsoft.com/library/cc231199.aspx\")\n// decode URI when available\n| extend decodedUriQuery = url_decode(csUriQuery)\n// Count of attempts by client IP on many ports\n| summarize makeset(sPort), makeset(decodedUriQuery), makeset(csUserName), makeset(sSiteName), makeset(sPort), makeset(csUserAgent), makeset(csMethod), makeset(csUriQuery), makeset(scStatusFull), makeset(scStatusFull_Friendly), makeset(scWin32Status_Hex), makeset(scWin32Status_Friendly), ConnectionsCount = count() by bin(TimeGenerated, timeBin), cIP, Computer, sIP\n| extend portCount = arraylength(set_sPort)\n| where portCount >= portThreshold\n| project TimeGenerated, cIP, set_sPort, set_csUserName, set_decodedUriQuery, Computer, set_sSiteName, sIP, set_csUserAgent, set_csMethod, set_scStatusFull, set_scStatusFull_Friendly, set_scWin32Status_Hex, set_scWin32Status_Friendly, ConnectionsCount, portCount\n| order by portCount\n| extend timestamp = TimeGenerated, IPCustomEntity = cIP",
+                "queryFrequency": "P1D",
+                "queryPeriod": "P1D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "44a555d8-ecee-4a25-95ce-055879b4b14b",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b204aa04-d291-4ee4-ac5f-6ba316dd2f52')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b204aa04-d291-4ee4-ac5f-6ba316dd2f52')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "High count of failed attempts from same client IP",
+                "description": "Identifies when 20 or more failed attempts from a given client IP in 1 minute occur on the IIS server.\nThis could be indicative of an attempted brute force. This could also simply indicate a misconfigured service or device.\nRecommendations: Validate that these are expected connections from the given Client IP.  If the client IP is not recognized, \npotentially block these connections at the edge device.\nIf these are expected connections, verify the credentials are properly configured on the system, service, application or device \nthat is associated with the client IP.\nReferences:\nIIS status code mapping: https://support.microsoft.com/help/943891/the-http-status-code-in-iis-7-0-iis-7-5-and-iis-8-0\nWin32 Status code mapping: https://msdn.microsoft.com/library/cc231199.aspx",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let timeBin = 1m;\nlet failedThreshold = 20;\nW3CIISLog\n| where scStatus in (\"401\",\"403\")\n| where csUserName != \"-\"\n| extend scStatusFull = strcat(scStatus, \".\",scSubStatus) \n// Map common IIS codes\n| extend scStatusFull_Friendly = case(\nscStatusFull == \"401.0\", \"Access denied.\",\nscStatusFull == \"401.1\", \"Logon failed.\",\nscStatusFull == \"401.2\", \"Logon failed due to server configuration.\",\nscStatusFull == \"401.3\", \"Unauthorized due to ACL on resource.\",\nscStatusFull == \"401.4\", \"Authorization failed by filter.\",\nscStatusFull == \"401.5\", \"Authorization failed by ISAPI/CGI application.\",\nscStatusFull == \"403.0\", \"Forbidden.\",\nscStatusFull == \"403.4\", \"SSL required.\",\n\"See - https://support.microsoft.com/help/943891/the-http-status-code-in-iis-7-0-iis-7-5-and-iis-8-0\")\n// Mapping to Hex so can be mapped using website in comments above\n| extend scWin32Status_Hex = tohex(tolong(scWin32Status)) \n// Map common win32 codes\n| extend scWin32Status_Friendly = case(\nscWin32Status_Hex =~ \"775\", \"The referenced account is currently locked out and cannot be logged on to.\",\nscWin32Status_Hex =~ \"52e\", \"Logon failure: Unknown user name or bad password.\",\nscWin32Status_Hex =~ \"532\", \"Logon failure: The specified account password has expired.\",\nscWin32Status_Hex =~ \"533\", \"Logon failure: Account currently disabled.\", \nscWin32Status_Hex =~ \"2ee2\", \"The request has timed out.\", \nscWin32Status_Hex =~ \"0\", \"The operation completed successfully.\", \nscWin32Status_Hex =~ \"1\", \"Incorrect function.\", \nscWin32Status_Hex =~ \"2\", \"The system cannot find the file specified.\", \nscWin32Status_Hex =~ \"3\", \"The system cannot find the path specified.\", \nscWin32Status_Hex =~ \"4\", \"The system cannot open the file.\", \nscWin32Status_Hex =~ \"5\", \"Access is denied.\", \nscWin32Status_Hex =~ \"8009030e\", \"SEC_E_NO_CREDENTIALS\", \nscWin32Status_Hex =~ \"8009030C\", \"SEC_E_LOGON_DENIED\", \n\"See - https://msdn.microsoft.com/library/cc231199.aspx\")\n// decode URI when available\n| extend decodedUriQuery = url_decode(csUriQuery)\n// Count of failed attempts from same client IP\n| summarize makeset(decodedUriQuery), makeset(csUserName), makeset(sSiteName), makeset(sPort), makeset(csUserAgent), makeset(csMethod), makeset(csUriQuery), makeset(scStatusFull), makeset(scStatusFull_Friendly), makeset(scWin32Status_Hex), makeset(scWin32Status_Friendly), FailedConnectionsCount = count() by bin(TimeGenerated, timeBin), cIP, Computer, sIP\n| where FailedConnectionsCount >= failedThreshold\n| project TimeGenerated, cIP, set_csUserName, set_decodedUriQuery, Computer, set_sSiteName, sIP, set_sPort, set_csUserAgent, set_csMethod, set_scStatusFull, set_scStatusFull_Friendly, set_scWin32Status_Hex, set_scWin32Status_Friendly, FailedConnectionsCount\n| order by FailedConnectionsCount\n| extend timestamp = TimeGenerated, HostCustomEntity = Computer, IPCustomEntity = cIP",
+                "queryFrequency": "PT4H",
+                "queryPeriod": "PT4H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "19e01883-15d8-4eb6-a7a5-3276cd668388",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/559eb6bf-8a9f-448c-8c68-9691555419d3')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/559eb6bf-8a9f-448c-8c68-9691555419d3')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "High count of failed logons by a user",
+                "description": "Identifies when 100 or more failed attempts by a given user in 10 minutes occur on the IIS Server.\nThis could be indicative of attempted brute force based on known account information.\nThis could also simply indicate a misconfigured service or device. \nReferences:\nIIS status code mapping - https://support.microsoft.com/help/943891/the-http-status-code-in-iis-7-0-iis-7-5-and-iis-8-0\nWin32 Status code mapping - https://msdn.microsoft.com/library/cc231199.aspx",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let timeBin = 10m;\nlet failedThreshold = 100;\nW3CIISLog\n| where scStatus in (\"401\",\"403\")\n| where csUserName != \"-\"\n// Handling Exchange specific items in IIS logs to remove the unique log identifier in the URI\n| extend csUriQuery = iff(csUriQuery startswith \"MailboxId=\", tostring(split(csUriQuery, \"&\")[0]) , csUriQuery )\n| extend csUriQuery = iff(csUriQuery startswith \"X-ARR-CACHE-HIT=\", strcat(tostring(split(csUriQuery, \"&\")[0]),tostring(split(csUriQuery, \"&\")[1])) , csUriQuery )\n| extend scStatusFull = strcat(scStatus, \".\",scSubStatus) \n// Map common IIS codes\n| extend scStatusFull_Friendly = case(\nscStatusFull == \"401.0\", \"Access denied.\",\nscStatusFull == \"401.1\", \"Logon failed.\",\nscStatusFull == \"401.2\", \"Logon failed due to server configuration.\",\nscStatusFull == \"401.3\", \"Unauthorized due to ACL on resource.\",\nscStatusFull == \"401.4\", \"Authorization failed by filter.\",\nscStatusFull == \"401.5\", \"Authorization failed by ISAPI/CGI application.\",\nscStatusFull == \"403.0\", \"Forbidden.\",\nscStatusFull == \"403.4\", \"SSL required.\",\n\"See - https://support.microsoft.com/help/943891/the-http-status-code-in-iis-7-0-iis-7-5-and-iis-8-0\")\n// Mapping to Hex so can be mapped using website in comments above\n| extend scWin32Status_Hex = tohex(tolong(scWin32Status)) \n// Map common win32 codes\n| extend scWin32Status_Friendly = case(\nscWin32Status_Hex =~ \"775\", \"The referenced account is currently locked out and cannot be logged on to.\",\nscWin32Status_Hex =~ \"52e\", \"Logon failure: Unknown user name or bad password.\",\nscWin32Status_Hex =~ \"532\", \"Logon failure: The specified account password has expired.\",\nscWin32Status_Hex =~ \"533\", \"Logon failure: Account currently disabled.\", \nscWin32Status_Hex =~ \"2ee2\", \"The request has timed out.\", \nscWin32Status_Hex =~ \"0\", \"The operation completed successfully.\", \nscWin32Status_Hex =~ \"1\", \"Incorrect function.\", \nscWin32Status_Hex =~ \"2\", \"The system cannot find the file specified.\", \nscWin32Status_Hex =~ \"3\", \"The system cannot find the path specified.\", \nscWin32Status_Hex =~ \"4\", \"The system cannot open the file.\", \nscWin32Status_Hex =~ \"5\", \"Access is denied.\", \nscWin32Status_Hex =~ \"8009030e\", \"SEC_E_NO_CREDENTIALS\", \nscWin32Status_Hex =~ \"8009030C\", \"SEC_E_LOGON_DENIED\", \n\"See - https://msdn.microsoft.com/library/cc231199.aspx\")\n// decode URI when available\n| extend decodedUriQuery = url_decode(csUriQuery)\n// Count of failed logons by a user\n| summarize makeset(decodedUriQuery), makeset(cIP), makeset(sSiteName), makeset(sPort), makeset(csUserAgent), makeset(csMethod), makeset(csUriQuery), makeset(scStatusFull), makeset(scStatusFull_Friendly), makeset(scWin32Status_Hex), makeset(scWin32Status_Friendly), FailedConnectionsCount = count() by bin(TimeGenerated, timeBin), csUserName, Computer, sIP\n| where FailedConnectionsCount >= failedThreshold\n| project TimeGenerated, csUserName, set_decodedUriQuery, Computer, set_sSiteName, sIP, set_cIP, set_sPort, set_csUserAgent, set_csMethod, set_scStatusFull, set_scStatusFull_Friendly, set_scWin32Status_Hex, set_scWin32Status_Friendly, FailedConnectionsCount\n| order by FailedConnectionsCount\n| extend timestamp = TimeGenerated, AccountCustomEntity = csUserName, HostCustomEntity = Computer",
+                "queryFrequency": "PT4H",
+                "queryPeriod": "PT4H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "884c4957-70ea-4f57-80b9-1bca3890315b",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        }
+    ]
+}

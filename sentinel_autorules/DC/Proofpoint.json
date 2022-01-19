@@ -1,0 +1,296 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/bdb461e5-bca7-4036-a8f8-ae064b135374')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bdb461e5-bca7-4036-a8f8-ae064b135374')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Possible data exfiltration to private email",
+                "description": "Detects when sender sent email to the non-corporate domain and recipient's username is the same as sender's username.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 10m;\nProofpointPOD\n| where TimeGenerated > ago(lbtime)\n| where EventType == 'message'\n| where NetworkDirection == 'outbound'\n| where array_length(todynamic(DstUserUpn)) == 1\n| extend sender = extract(@'\\A(.*?)@', 1, SrcUserUpn)\n| extend sender_domain = extract(@'@(.*)$', 1, SrcUserUpn)\n| extend recipient = extract(@'\\A(.*?)@', 1, tostring(todynamic(DstUserUpn)[0]))\n| extend recipient_domain = extract(@'@(.*)$', 1, tostring(todynamic(DstUserUpn)[0]))\n| where sender =~ recipient\n| where sender_domain != recipient_domain\n| project SrcUserUpn, DstUserUpn\n| extend AccountCustomEntity = SrcUserUpn\n",
+                "queryFrequency": "PT10M",
+                "queryPeriod": "PT10M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/dd9e4d56-3d4f-4e61-8f05-c8a8897628ba')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/dd9e4d56-3d4f-4e61-8f05-c8a8897628ba')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Binary file in attachment",
+                "description": "Detects when email recieved with binary file as attachment.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 10m;\nProofpointPOD\n| where TimeGenerated > ago(lbtime)\n| where EventType == 'message'\n| where NetworkDirection == 'inbound'\n| where FilterDisposition !in ('reject', 'discard')\n| extend attachedMimeType = todynamic(MsgParts)[0]['detectedMime']\n| where attachedMimeType == 'application/zip'\n| project SrcUserUpn, DstUserUpn\n| extend AccountCustomEntity = DstUserUpn\n",
+                "queryFrequency": "PT10M",
+                "queryPeriod": "PT10M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/93bf7cc2-6aec-4d1d-8b56-52166be13f1b')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/93bf7cc2-6aec-4d1d-8b56-52166be13f1b')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Weak ciphers",
+                "description": "Detects when weak TLS ciphers are used.",
+                "severity": "Low",
+                "enabled": false,
+                "query": "let lbtime = 1h;\nlet tls_ciphers = dynamic(['RC4-SHA', 'DES-CBC3-SHA']);\nProofpointPOD\n| where EventType == 'message'\n| where TlsCipher in (tls_ciphers)\n| extend IpCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ed58c16b-4400-4dbe-bff6-5de743659d94')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ed58c16b-4400-4dbe-bff6-5de743659d94')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Multiple protected emails to unknown recipient",
+                "description": "Detects when multiple protected messages where sent to early not seen recipient.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 30m;\nlet lbperiod = 30d;\nlet knownrecipients = ProofpointPOD\n| where TimeGenerated > ago(lbperiod)\n| where EventType == 'message'\n| where NetworkDirection == 'outbound'\n| where SrcUserUpn != ''\n| where array_length(todynamic(DstUserUpn)) == 1\n| summarize recipients = make_set(tostring(todynamic(DstUserUpn)[0])) by SrcUserUpn\n| extend commcol = SrcUserUpn;\nProofpointPOD\n| where TimeGenerated between (ago(lbtime) .. now())\n| where EventType == 'message'\n| where NetworkDirection == 'outbound'\n| extend isProtected = todynamic(MsgParts)[0]['isProtected']\n| extend mimePgp = todynamic(MsgParts)[0]['detectedMime']\n| where isProtected == 'true' or mimePgp == 'application/pgp-encrypted'\n| extend DstUserMail = tostring(todynamic(DstUserUpn)[0])\n| extend commcol = tostring(todynamic(DstUserUpn)[0])\n| join knownrecipients on commcol\n| where recipients !contains DstUserMail\n| project SrcUserUpn, DstUserMail\n| extend AccountCustomEntity = SrcUserUpn\n",
+                "queryFrequency": "PT30M",
+                "queryPeriod": "PT30M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Exfiltration"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/e2050030-bd2e-468e-b4d3-b3f9aab05914')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/e2050030-bd2e-468e-b4d3-b3f9aab05914')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Multiple archived attachments to the same recipient",
+                "description": "Detects when multiple emails where sent to the same recipient with large archived attachments.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 30m;\nlet msgthreshold = 3;\nProofpointPOD\n| where TimeGenerated > ago(lbtime)\n| where EventType == 'message'\n| where NetworkDirection == 'outbound'\n| extend attachedMimeType = todynamic(MsgParts)[0]['detectedMime']\n| where attachedMimeType == 'application/zip'\n| summarize count() by SrcUserUpn, DstUserUpn\n| where count_ > msgthreshold\n| extend AccountCustomEntity = SrcUserUpn\n",
+                "queryFrequency": "PT30M",
+                "queryPeriod": "PT30M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Exfiltration"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/4b3be98b-f854-4e9c-803e-1982ac6889bd')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/4b3be98b-f854-4e9c-803e-1982ac6889bd')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Multiple large emails to the same recipient",
+                "description": "Detects when multiple emails with lage size where sent to the same recipient.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 30m;\nlet msgthreshold = 3;\nlet msgszthreshold = 3000000;\nProofpointPOD\n| where TimeGenerated > ago(lbtime)\n| where EventType == 'message'\n| where NetworkDirection == 'outbound'\n| where NetworkBytes_real > msgszthreshold\n| summarize count() by SrcUserUpn, DstUserUpn\n| where count_ > msgthreshold\n| extend AccountCustomEntity = SrcUserUpn\n",
+                "queryFrequency": "PT30M",
+                "queryPeriod": "PT30M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Exfiltration"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/1ce6b3a1-200b-479d-82df-eb7b63aa9e25')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/1ce6b3a1-200b-479d-82df-eb7b63aa9e25')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "ProofpointPOD - Suspicious attachment",
+                "description": "Detects when email contains suspicious attachment (file type).",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbtime = 10m;\nlet disallowed_ext = dynamic(['ps1', 'exe', 'vbs', 'js', 'scr']);\nProofpointPOD\n| where TimeGenerated > ago(lbtime)\n| where EventType == 'message'\n| where NetworkDirection == 'inbound'\n| where FilterDisposition !in ('reject', 'discard')\n| extend attachedExt = todynamic(MsgParts)[0]['detectedExt']\n| where attachedExt in (disallowed_ext)\n| project SrcUserUpn, DstUserUpn\n| extend AccountCustomEntity = DstUserUpn\n",
+                "queryFrequency": "PT10M",
+                "queryPeriod": "PT10M",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        }
+    ]
+}

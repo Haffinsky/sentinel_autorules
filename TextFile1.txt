@@ -1,0 +1,42 @@
+
+
+# Check if file exists
+if path.isfile(filename) is False:
+  raise Exception("File not found")
+
+a_file = open(template, "r")
+json_object = json.load(a_file)
+a_file.close
+
+rules_file = open(filename1, "r")
+json_rules = json.load(rules_file)
+rules_file.close
+
+rules_file2 = open(filename2, "r")
+json_rules2 = json.load(rules_file2)
+rules_file2.close
+
+#json_object['resources'].append(json_rules)
+#json_object['resources'].append(json_rules2)
+
+
+#with open('test.txt', 'w') as f:
+
+#    f.write(json.dumps(a))
+
+print(syslog_path)
+
+for path in pathlib.Path(syslog_path).iterdir():
+    if path.is_file():
+        current_file = open(path, "r")
+        print(current_file.read())
+        syslog_rules = current_file.read()
+        print(syslog_rules)
+        json_object['resources'].append(syslog_rules)
+        print(json_object['resources'].append(syslog_rules))
+        current_file.close()
+
+with open('test.txt', 'w') as f:
+    a = json_object
+    f.write(json.dumps(a))
+

@@ -1,0 +1,552 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/bf20eb5e-faae-4759-be71-c7c491781872')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bf20eb5e-faae-4759-be71-c7c491781872')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Apache 2.4.49 flaw CVE-2021-41773",
+                "description": "Detects using Apache 2.4.49 flaw CVE-2021-41773",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "ApacheHTTPServer\n| where HttpRequestMethod =~ \"GET\"\n| where UrlOriginal contains \"/cgi-bin/\" and UrlOriginal contains \"/%2e%2e/\"\n| where HttpStatusCode == \"200\" \n| extend UrlCustomEntity = UrlOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "LateralMovement"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "URL",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Url",
+                                "columnName": "UrlCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/75912b32-ce31-4d08-bf79-a8d4bd16427c')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/75912b32-ce31-4d08-bf79-a8d4bd16427c')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Command in URI",
+                "description": "Detects command in URI",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "ApacheHTTPServer\n| where UrlOriginal contains \"whoami\" or UrlOriginal contains \"dpkg\" or UrlOriginal contains \"useradd\" or UrlOriginal contains \"sudo\"\n| extend UrlCustomEntity = UrlOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "URL",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Url",
+                                "columnName": "UrlCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/fb91a30b-0647-4d3a-a1b0-fc844feca6e6')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/fb91a30b-0647-4d3a-a1b0-fc844feca6e6')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Known malicious user agent",
+                "description": "Detects known malicious user agents",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "ApacheHTTPServer\n| where HttpUserAgentOriginal has_any (\"Metasploit\" , \"360Spider\", \"404checker\", \"AllSubmitter\", \"BackDoorBot\", \"CATExplorador\")\n| extend MalwareCustomEntity = HttpUserAgentOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Malware",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "MalwareCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d09a9f71-ad81-4777-afc7-4803866f785b')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d09a9f71-ad81-4777-afc7-4803866f785b')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Multiple client errors from single IP",
+                "description": "Detects multiple client errors from one source in short timeframe",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let threashold = 100;\nApacheHTTPServer\n| where tolong(HttpStatusCode) >= 400 and tolong(HttpStatusCode) <= 499\n| summarize MultipleClientErrors = count() by SrcIpAddr, bin(TimeGenerated, 5m)\n| where MultipleClientErrors > threashold\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/6d3d3e2d-9f73-49d3-a264-19a7832d64b8')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/6d3d3e2d-9f73-49d3-a264-19a7832d64b8')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Multiple server errors from single IP",
+                "description": "Detects multiple server errors from one source in short timeframe",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let threashold = 100;\nApacheHTTPServer\n| where tolong(HttpStatusCode) >= 500 and tolong(HttpStatusCode) <= 599 \n| summarize MultipleServerErrors = count() by SrcIpAddr, bin(TimeGenerated, 5m)\n| where MultipleServerErrors > threashold\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Impact",
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/48801be4-a426-4c6a-bee0-ee91b0dd9b6c')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/48801be4-a426-4c6a-bee0-ee91b0dd9b6c')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Private IP in URL",
+                "description": "Detects requests to unusual URL",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "ApacheHTTPServer\n| where UrlOriginal matches regex @'(10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})|(172\\.1[6-9]\\.\\d{1,3}\\.\\d{1,3})|(172\\.2[0-9]\\.\\d{1,3}\\.\\d{1,3})|(172\\.3[0-1]\\.\\d{1,3}\\.\\d{1,3})|(192\\.168\\.\\d{1,3}\\.\\d{1,3})'\n| extend UrlCustomEntity = UrlOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "URL",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Url",
+                                "columnName": "UrlCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/97ebaaab-52f2-46f0-beaf-079766c42b81')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/97ebaaab-52f2-46f0-beaf-079766c42b81')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Put suspicious file",
+                "description": "Detects PUT or POST of suspicious file",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "ApacheHTTPServer\n| where HttpRequestMethod in~ (\"POST\", \"PUT\") \n| extend File = extract(@\"(.*\\/)?(.*)\", 2, tostring(UrlOriginal))\n| where isnotempty(File)\n| where File matches regex @\"([a-zA-Z0-9-_]+\\.)([a-zA-Z0-9-]+\\.[a-zA-Z0-9-]+)\"\n| extend FileCustomEntity = File, UrlCustomEntity = UrlOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "Exfiltration"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "File",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "FileCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "URL",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Url",
+                                "columnName": "UrlCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a7ccd970-d5e9-490b-b73a-25209195534b')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a7ccd970-d5e9-490b-b73a-25209195534b')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Request from private IP",
+                "description": "Detects requests from private IP",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "ApacheHTTPServer\n| where ipv4_is_private(SrcIpAddr)\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Impact",
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/00547bb3-299d-403c-9bf9-8efb3f65087e')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/00547bb3-299d-403c-9bf9-8efb3f65087e')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Request to sensitive files",
+                "description": "Detects request to sensitive files.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let forbidden_files = dynamic(['shadow', 'passwd', 'id_rsa']);\nApacheHTTPServer    \n| extend File = extract(@'(.*\\/)?(.*)', 2, tostring(UrlOriginal))\n| where File in (forbidden_files)\n| extend FileCustomEntity = File, UrlCustomEntity = UrlOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "File",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "FileCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "URL",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Url",
+                                "columnName": "UrlCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/4dd73b87-ae96-4051-9fb9-d05af08764f6')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/4dd73b87-ae96-4051-9fb9-d05af08764f6')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Apache - Requests to rare files",
+                "description": "Shows requests to rare files",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lb_period_start = 14d;\nlet lb_period_end = 1d;\nlet known_files = ApacheHTTPServer\n| where TimeGenerated between (ago(lb_period_start) .. ago(lb_period_end))\n| extend File = extract(@\"(.*\\/)?(.*)\", 2, tostring(UrlOriginal))\n| summarize makeset(File);\nApacheHTTPServer\n| where TimeGenerated > ago(24h)\n| extend File = extract(@\"(.*\\/)?(.*)\", 2, tostring(UrlOriginal))\n| where File in~ (known_files)\n| extend FileCustomEntity = File, UrlCustomEntity = UrlOriginal\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "P14D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "File",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "FileCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "URL",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Url",
+                                "columnName": "UrlCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

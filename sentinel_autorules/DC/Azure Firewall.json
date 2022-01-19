@@ -1,0 +1,179 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/e5ee3315-5505-46f9-bc3b-4c1ca1a640a7')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/e5ee3315-5505-46f9-bc3b-4c1ca1a640a7')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Abnormal Port to Protocol",
+                "description": "Identifies communication for well known protocol over a non-standard port based on learning period activity. This can indicate malicious communication (C2) or exfiltration by attackers trying to communicate over known ports (22:SSH, 80:HTTP) but don't use the known protocol headers to match the port number.\n\nConfigurable Parameters:\n\n- Learning period time - learning period for protocol learning in days. Default is set to 7.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let LearningPeriod = 7d;\nlet RunTime = 1d;\nlet StartLearningPeriod = LearningPeriod + RunTime;\nlet EndRunTime = RunTime - 1d;\nlet LearningPortToProtocol = (AzureDiagnostics | where OperationName == \"AzureFirewallApplicationRuleLog\" | parse msg_s with protocol \" request from \" srcip \":\" srcport \" to \" dsturl \":\" dstport \".\" * | where isnotempty(dstport) | where TimeGenerated between (ago(StartLearningPeriod) .. ago(RunTime)) | summarize LearningTimeCount = count() by LearningTimeDstPort = dstport, LearningTimeProtocol = protocol, srcip, dsturl);\nlet AlertTimePortToProtocol = (AzureDiagnostics | where OperationName == \"AzureFirewallApplicationRuleLog\" | parse msg_s with protocol \" request from \" srcip \":\" srcport \" to \" dsturl \":\" dstport \".\" * | where isnotempty(dstport) | where TimeGenerated between (ago(RunTime) .. ago(EndRunTime)) | summarize AlertTimeCount = count() by AlertTimeDstPort = dstport, AlertTimeProtocol = protocol);\nAlertTimePortToProtocol | join kind=leftouter (LearningPortToProtocol) on $left.AlertTimeDstPort == $right.LearningTimeDstPort | where LearningTimeProtocol != AlertTimeProtocol | extend IPCustomEntity = srcip, URLCustomEntity = dsturl\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 1,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "DefenseEvasion",
+                    "Exfiltration",
+                    "CommandAndControl"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ebe469b8-a385-4ae2-83e8-cf6044228c5b')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ebe469b8-a385-4ae2-83e8-cf6044228c5b')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Abnormal Deny Rate for Source IP",
+                "description": "Identifies abnormal deny rate for specific source IP to destination IP based on the normal average and standard deviation learned during a configured period. This can indicate potential exfiltration, initial access or C2, where attacker tries to exploit the same vulnerability on machines in the organization, but is being blocked by firewall rules.\n\nConfigurable Parameters:\n\n- Minimum of stds threshold - the number of stds to use in the threshold calculation. Default is set to 3.\n- Learning period time - learning period for threshold calculation in days. Default is set to 5.\n- Bin time - learning buckets time in hours. Default is set to 1 hour.\n- Minimum threshold - minimum threshold for alert. Default is set to 5.\n- Minimum bucket threshold - minimum learning buckets threshold for alert. Default is set to 5.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let LearningPeriod = 5d;\nlet RunTime = 1h;\nlet StartLearningPeriod = LearningPeriod + RunTime;\nlet EndRunTime = RunTime - 1d;\nlet BinTime = 1h;\nlet NumOfStdsThreshold = 3;\nlet MinThreshold = 5.0;\nlet MinLearningBuckets = 5;\nlet TrafficLogs = (AzureDiagnostics | where TimeGenerated  between (ago(StartLearningPeriod) .. ago(EndRunTime)) | where OperationName == \"AzureFirewallApplicationRuleLog\" or OperationName == \"AzureFirewallNetworkRuleLog\" | parse msg_s with * \"from \" srcip \":\" srcport \" to \" dsturl \":\" dstport \". Action: \" action \".\" * | where action == \"Deny\" | where isnotempty(dsturl) and isnotempty(srcip));\nlet LearningSrcIpDenyRate = (TrafficLogs | where TimeGenerated between (ago(StartLearningPeriod) .. ago(RunTime)) | summarize count() by srcip, bin(TimeGenerated, BinTime), dsturl | summarize LearningTimeSrcIpDenyRateAvg = avg(count_), LearningTimeSrcIpDenyRateStd = stdev(count_), LearningTimeBuckets = count() by srcip, dsturl | where LearningTimeBuckets > MinLearningBuckets); \nlet AlertTimeSrcIpDenyRate = (TrafficLogs | where TimeGenerated between (ago(RunTime) .. ago(EndRunTime)) | summarize AlertTimeSrcIpDenyRateCount = count() by srcip);\nAlertTimeSrcIpDenyRate | join kind=leftouter (LearningSrcIpDenyRate) on srcip | extend LreaningThreshold = max_of(LearningTimeSrcIpDenyRateAvg + NumOfStdsThreshold * LearningTimeSrcIpDenyRateStd, MinThreshold) | where AlertTimeSrcIpDenyRateCount > LreaningThreshold | project-away srcip1, LearningTimeSrcIpDenyRateAvg, LearningTimeSrcIpDenyRateStd | extend IPCustomEntity = srcip, URLCustomEntity = dsturl\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 1,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "Exfiltration",
+                    "CommandAndControl"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/43277248-423d-4b46-93bc-74f369314b67')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/43277248-423d-4b46-93bc-74f369314b67')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Port Scan",
+                "description": "Identifies a source IP scanning multiple open ports on Azure Firewall. This can indicate malicious scanning of ports by an attacker, trying to reveal open ports in the organization that can be compromised for initial access.\n\nConfigurable Parameters:\n\n- Port scan time - the time range to look for multiple ports scanned. Default is set to 30 seconds.\n- Minimum different ports threshold - alert only if more than this number of ports scanned. Default is set to 100.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let RunTime = 1h;\nlet StartRunTime = 1d;\nlet EndRunTime = StartRunTime - RunTime;\nlet MinimumDifferentPortsThreshold = 100;\nlet BinTime = 30s;\nAzureDiagnostics | where TimeGenerated  between (ago(StartRunTime) .. ago(EndRunTime)) | where OperationName == \"AzureFirewallApplicationRuleLog\" or OperationName == \"AzureFirewallNetworkRuleLog\" | parse msg_s with * \"from \" srcip \":\" srcport \" to \" dsturl \":\" dstport | where isnotempty(dsturl) and isnotempty(srcip) | summarize AlertTimedCountPortsInBinTime = dcount(dstport) by srcip, bin(TimeGenerated, BinTime), dsturl | where AlertTimedCountPortsInBinTime > MinimumDifferentPortsThreshold | extend IPCustomEntity = srcip, URLCustomEntity = dsturl\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 1,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Discovery"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/06cca04f-dd87-4ed2-8088-5496ceccda08')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/06cca04f-dd87-4ed2-8088-5496ceccda08')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Port Sweep",
+                "description": "Identifies a source IP scanning same open ports on the Azure Firewall IPs. This can indicate malicious scanning of port by an attacker, trying to reveal IPs with specific ports open in the organization. The ports can be compromised by attackers for initial access, most often by exploiting vulnerability.\n\nConfigurable Parameters:\n\n- Port sweep time - the time range to look for multiple hosts scanned. Default is set to 30 seconds.\n- Minimum different hosts threshold - alert only if more than this number of hosts scanned. Default is set to 200.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let RunTime = 1h;\nlet StartRunTime = 1d;\nlet EndRunTime = StartRunTime - RunTime;\nlet MinimumDifferentHostsThreashold = 200;\nlet ExcludedPorts = dynamic([80, 443]);\nlet BinTime = 30s;\nAzureDiagnostics | where TimeGenerated  between (ago(StartRunTime) .. ago(EndRunTime)) | where OperationName == \"AzureFirewallApplicationRuleLog\" or OperationName == \"AzureFirewallNetworkRuleLog\" | parse msg_s with * \"from \" srcip \":\" srcport \" to \" dsturl \":\" dstport | where dstport !in (ExcludedPorts) | where isnotempty(dsturl) and isnotempty(srcip) and isnotempty(dstport) | summarize AlertTimedCountHostsInBinTime = dcount(dsturl) by srcip, bin(TimeGenerated, BinTime), dstport, dsturl | where AlertTimedCountHostsInBinTime > MinimumDifferentHostsThreashold | extend IPCustomEntity = srcip, URLCustomEntity = dsturl\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 1,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Discovery"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        }
+    ]
+}

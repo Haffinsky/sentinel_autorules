@@ -1,0 +1,359 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d314cc6a-cfec-40e7-b1a7-43e954ecfd02')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d314cc6a-cfec-40e7-b1a7-43e954ecfd02')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Suspicious Base64 download activity detected",
+                "description": "This hunting query will help detect suspicious encoded Base64 obfuscated scripts that attackers use to encode payloads for downloading and executing malicious files. This technique is often used by attackers and was recently used to exploit a remote code execution vulnerability in the Log4j component of Apache in order to evade detection and stay persistent in the network. For more details on Apache Log4j Remote Code Execution Vulnerability - https://community.riskiq.com/article/505098fc/description Find more details on collecting EXECVE data into Microsoft Sentinel - https://techcommunity.microsoft.com/t5/azure-sentinel/hunting-threats-on-linux-with-azure-sentinel/ba-p/1344431",
+                "severity": "High",
+                "enabled": true,
+                "query": "Syslog\r\n| where Facility == 'user'\r\n| where SyslogMessage has \"AUOMS_EXECVE\"\r\n| parse SyslogMessage with \"type=\" EventType \" audit(\" * \"): \" EventData\r\n| project TimeGenerated, EventType, Computer, EventData\r\n| where EventType =~ \"AUOMS_EXECVE\"\r\n| parse EventData with * \"syscall=\" syscall \" syscall_r=\" * \" success=\" success \" exit=\" exit \" a0\" * \" ppid=\" ppid \" pid=\" pid \" audit_user=\" audit_user \" auid=\" auid \" user=\" user \" uid=\" uid \" group=\" group \" gid=\" gid \"effective_user=\" effective_user \" euid=\" euid \" set_user=\" set_user \" suid=\" suid \" filesystem_user=\" filesystem_user \" fsuid=\" fsuid \" effective_group=\" effective_group \" egid=\" egid \" set_group=\" set_group \" sgid=\" sgid \" filesystem_group=\" filesystem_group \" fsgid=\" fsgid \" tty=\" tty \" ses=\" ses \" comm=\\\"\" comm \"\\\" exe=\\\"\" exe \"\\\"\" * \"cwd=\\\"\" cwd \"\\\"\" * \"name=\\\"\" name \"\\\"\" * \"cmdline=\\\"\" cmdline \"\\\" containerid=\" containerid\r\n| where cmdline has \"/Basic/Command/Base64/\"\r\n| where exe has_any (\"curl\", \"wget\")\r\n| parse cmdline with * \"Base64/\" OriginalEncodedCommand:string\r\n| extend EncodedCommand = extract(\"((?:[A-Za-z0-9+/-]{4})*(?:[A-Za-z0-9+/-]{2}==|[A-Za-z0-9+/-]{3}=|[A-Za-z0-9+/-]{4}))\", 1, OriginalEncodedCommand) \r\n| extend DecodedCommand = base64_decode_tostring(EncodedCommand) \r\n| project TimeGenerated, Computer, audit_user, user, cmdline, DecodedCommand, EncodedCommand\r\n| extend AccountCustomEntity = user, HostCustomEntity = Computer, timestamp = TimeGenerated\r\n| sort by TimeGenerated desc",
+                "queryFrequency": "PT5H",
+                "queryPeriod": "PT5H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Impact"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/d0baa19b-c2d9-4c3a-a0c8-4bfd3a717171')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/d0baa19b-c2d9-4c3a-a0c8-4bfd3a717171')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Failed logon attempts in authpriv",
+                "description": "Identifies failed logon attempts from unknown users in Syslog authpriv logs. The unknown user means the account that tried to log in \nisn't provisioned on the machine. A few hits could indicate someone attempting to access a machine they aren't authorized to access. \nIf there are many of hits, especially from outside your network, it could indicate a brute force attack. \nDefault threshold for logon attempts is 15.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let threshold = 15;\n// Below pulls messages from syslog-authpriv logs where there was an authentication failure with an unknown user.\n// IP address of system attempting logon is also extracted from the SyslogMessage field. Some of these messages\n// are aggregated.\nlet authfail = Syslog\n| where Facility =~ \"authpriv\"   // looks at authpriv messages\n| where SyslogMessage contains \"authentication failure\" and SyslogMessage contains \" uid=0\"\n| parse SyslogMessage with * \"rhost=\" ExternalIP\n| project TimeGenerated, Computer, ProcessName, HostIP, ExternalIP, ProcessID;  \n// Below pulls messages from syslog-authpriv logs that show each instance an unknown user tried to logon. \nlet userfail = Syslog \n| where Facility =~ \"authpriv\" \n| where SyslogMessage contains \"user unknown\"\n| project TimeGenerated, Computer, HostIP, ProcessID;\n// Join the two log messages above\nlet userauthfail = authfail | join (userfail) on Computer, HostIP, ProcessID\n| project TimeGenerated, Computer, HostIP, ExternalIP, ProcessID ;\n// Extract the EventTime of the first logon attempt\nlet firstfail = userauthfail\n| summarize arg_min(TimeGenerated, *) by Computer, ExternalIP\n| project Computer, ExternalIP, FirstLogonAttempt = TimeGenerated;\n// Extract the EventTime of the last logon attempt\nlet lastfail = userauthfail\n| summarize arg_max(TimeGenerated, *) by Computer, ExternalIP\n| project Computer, ExternalIP, LatestLogonAttempt = TimeGenerated;\n// Join first and last logon attempt data and calculate the time between them (AttemptPeriodLength).\nlet faildates = firstfail | join (lastfail) on Computer, ExternalIP\n| project ExternalIP, Computer, FirstLogonAttempt, LatestLogonAttempt, TimeBetweenLogonAttempts = LatestLogonAttempt - FirstLogonAttempt;\n// Count the number of failed logon attempts by External IP and internal machine\nlet totalfails = userauthfail\n| summarize StartTimeUtc = min(TimeGenerated), EndTimeUtc = max(TimeGenerated), TotalLogonAttempts = count() by ExternalIP, Computer, HostIP\n| project StartTimeUtc, EndTimeUtc, ExternalIP, Computer, HostIP, TotalLogonAttempts;\n// Combine total attempts with timing data from above\nlet finalfails = totalfails | join (faildates) on Computer, ExternalIP\n| project StartTimeUtc, EndTimeUtc, SourceAddress = ExternalIP, DestinationHost = Computer, DestinationIP = HostIP, TotalLogonAttempts, FirstLogonAttempt, LatestLogonAttempt, TimeBetweenLogonAttempts\n| order by DestinationHost asc nulls last;\nfinalfails \n| where TotalLogonAttempts >= threshold\n| extend timestamp = StartTimeUtc, HostCustomEntity = DestinationHost, IPCustomEntity = DestinationIP",
+                "queryFrequency": "P1D",
+                "queryPeriod": "P1D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "e7ec9fa6-e7f7-41ed-a34b-b956837a3ee6",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ace81330-59dc-4625-8a04-9582e7fbc5ff')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ace81330-59dc-4625-8a04-9582e7fbc5ff')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "New internet-exposed SSH endpoints",
+                "description": "Looks for SSH endpoints that rarely are accessed from a public IP address, in comparison with their history of sign-ins from private IP addresses.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "let PrivateIPregex = @'^127\\.|^10\\.|^172\\.1[6-9]\\.|^172\\.2[0-9]\\.|^172\\.3[0-1]\\.|^192\\.168\\.'; \nlet avgthreshold = 0;\nlet probabilityLimit = 0.01;\nlet ssh_logins = Syslog\n| where Facility contains \"auth\" and ProcessName =~ \"sshd\"\n| where SyslogMessage has \"Accepted\"\n| extend SourceIP = extract(\"(([0-9]{1,3})\\\\.([0-9]{1,3})\\\\.([0-9]{1,3})\\\\.(([0-9]{1,3})))\",1,SyslogMessage) \n| where isnotempty(SourceIP)\n| extend ipType = iff(SourceIP matches regex PrivateIPregex,\"private\" ,\"public\");\nssh_logins \n| summarize privatecount=countif(ipType==\"private\"), publiccount=countif(ipType==\"public\") by HostName, HostIP, bin(EventTime, 1d)\n| summarize \npublicIPLoginHistory  = make_list(pack('IPCount', publiccount,  'logon_time', EventTime)),\nprivateIPLoginHistory = make_list(pack('IPCount', privatecount, 'logon_time', EventTime)) by HostName, HostIP\n| mv-apply publicIPLoginHistory = publicIPLoginHistory on\n(\n    order by todatetime(publicIPLoginHistory['logon_time']) asc\n    | summarize publicIPLoginCountList=make_list(toint(publicIPLoginHistory['IPCount'])), publicAverage=avg(toint(publicIPLoginHistory['IPCount'])), publicStd=stdev(toint(publicIPLoginHistory['IPCount'])), maxPublicLoginCount=max(toint(publicIPLoginHistory['IPCount']))\n)\n| mv-apply privateIPLoginHistory = privateIPLoginHistory on\n(\n    order by todatetime(privateIPLoginHistory['logon_time']) asc\n    | summarize privateIPLoginCountList=make_list(toint(privateIPLoginHistory['IPCount'])), privateAverage=avg(toint(privateIPLoginHistory['IPCount'])), privateStd=stdev(toint(privateIPLoginHistory['IPCount']))\n)\n// Some logins from private IPs\n| where privateAverage > avgthreshold\n// There is a non-zero number of logins from public IPs\n| where publicAverage > avgthreshold\n// Approximate probability of seeing login from a public IP is < 1%\n| extend probabilityPublic = publicAverage / (privateAverage + publicAverage)\n| where probabilityPublic < probabilityLimit\n// Today has the highest number of logins from public IPs that we've seen in the last week\n| extend publicLoginCountToday = publicIPLoginCountList[-1]\n| where publicLoginCountToday >= maxPublicLoginCount\n| extend HostCustomEntity = HostName\n// Optionally retrieve the original raw data for those logins that we've identified as potentially suspect\n// | join kind=rightsemi (\n//   ssh_logins\n//  | where ipType == \"public\"\n//  ) on HostName",
+                "queryFrequency": "P1D",
+                "queryPeriod": "P7D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "4915c713-ab38-432e-800b-8e2d46933de6",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.1"
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/698cc7e8-3a7f-4e0b-9373-b31968331791')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/698cc7e8-3a7f-4e0b-9373-b31968331791')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Possible Linux attack toolkit detected via Syslog data",
+                "description": "This query uses syslog data to alert on any attack toolkits associated with massive scanning or exploitation attempts against a known vulnerability. Attackers may perform such operations as seen recently to exploit the remote code execution vulnerability in Log4j component of Apache to scope and prioritize post-compromise objectives. For more details on Apache Log4j Remote Code Execution Vulnerability - https://community.riskiq.com/article/505098fc/description Find more details on collecting EXECVE data into Microsoft Sentinel - https://techcommunity.microsoft.com/t5/azure-sentinel/hunting-threats-on-linux-with-azure-sentinel/ba-p/1344431",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "Syslog\r\n| where Facility == 'user'\r\n| where SyslogMessage has \"AUOMS_EXECVE\"\r\n| parse SyslogMessage with \"type=\" EventType \" audit(\" * \"): \" EventData\r\n| where EventType =~ \"AUOMS_EXECVE\"\r\n| parse EventData with * \"syscall=\" syscall \" syscall_r=\" * \" success=\" success \" exit=\" exit \" a0\" * \" ppid=\" ppid \" pid=\" pid \" audit_user=\" audit_user \" auid=\" auid \" user=\" user \" uid=\" uid \" group=\" group \" gid=\" gid \"effective_user=\" effective_user \" euid=\" euid \" set_user=\" set_user \" suid=\" suid \" filesystem_user=\" filesystem_user \" fsuid=\" fsuid \" effective_group=\" effective_group \" egid=\" egid \" set_group=\" set_group \" sgid=\" sgid \" filesystem_group=\" filesystem_group \" fsgid=\" fsgid \" tty=\" tty \" ses=\" ses \" comm=\\\"\" comm \"\\\" exe=\\\"\" exe \"\\\"\" * \"cwd=\\\"\" cwd \"\\\"\" * \"name=\\\"\" name \"\\\"\" * \"cmdline=\\\"\" cmdline \"\\\" containerid=\" containerid\r\n| where (exe has \"java\" and cmdline has \"JNDI-Injection-Exploit\")\r\n    or (exe has \"javac\" and cmdline has \"log4j-payload-generator\")\r\n    or (cmdline has \"LogMePwn\" and cmdline has \"git clone\")\r\n| project TimeGenerated, Computer, audit_user, user, cmdline\r\n| extend\r\n    AccountCustomEntity = user,\r\n    HostCustomEntity = Computer,\r\n    timestamp = TimeGenerated\r\n| sort by TimeGenerated desc",
+                "queryFrequency": "PT5H",
+                "queryPeriod": "PT5H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Impact"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "HostCustomEntity"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/01f796e5-801e-4505-8e16-01d050ca795f')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/01f796e5-801e-4505-8e16-01d050ca795f')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Suspicious manipulation of firewall detected via Syslog data",
+                "description": "This query uses syslog data to alert on any suspicious manipulation of firewall to evade defenses. Attackers often perform such operation as seen recently to exploit the remote code execution vulnerability in Log4j component of Apache for C2 communications or exfiltration. For more details on Apache Log4j Remote Code Execution Vulnerability - https://community.riskiq.com/article/505098fc/description Find more details on collecting EXECVE data into Microsoft Sentinel - https://techcommunity.microsoft.com/t5/azure-sentinel/hunting-threats-on-linux-with-azure-sentinel/ba-p/1344431",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "Syslog\r\n| where Facility == 'user'\r\n| where SyslogMessage has \"AUOMS_EXECVE\"\r\n| parse SyslogMessage with \"type=\" EventType \" audit(\" * \"): \" EventData\r\n| where EventType =~ \"AUOMS_EXECVE\"\r\n| parse EventData with * \"syscall=\" syscall \" syscall_r=\" * \" success=\" success \" exit=\" exit \" a0\" * \" ppid=\" ppid \" pid=\" pid \" audit_user=\" audit_user \" auid=\" auid \" user=\" user \" uid=\" uid \" group=\" group \" gid=\" gid \"effective_user=\" effective_user \" euid=\" euid \" set_user=\" set_user \" suid=\" suid \" filesystem_user=\" filesystem_user \" fsuid=\" fsuid \" effective_group=\" effective_group \" egid=\" egid \" set_group=\" set_group \" sgid=\" sgid \" filesystem_group=\" filesystem_group \" fsgid=\" fsgid \" tty=\" tty \" ses=\" ses \" comm=\\\"\" comm \"\\\" exe=\\\"\" exe \"\\\"\" * \"cwd=\\\"\" cwd \"\\\"\" * \"name=\\\"\" name \"\\\"\" * \"cmdline=\\\"\" cmdline \"\\\" containerid=\" containerid\r\n| where cmdline has_any (\"SuSEfirewall2 stop\",\"reSuSEfirewall2 stop\",\"ufw stop\",\"ufw disable\")\r\n| project TimeGenerated, Computer, audit_user, user, cmdline\r\n| extend AccountCustomEntity = user, HostCustomEntity = Computer, timestamp = TimeGenerated\r\n| sort by TimeGenerated desc",
+                "queryFrequency": "PT5H",
+                "queryPeriod": "PT5H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "DefenseEvasion",
+                    "Discovery"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/181abe52-cf5d-445f-bc6f-5293506ccc0c')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/181abe52-cf5d-445f-bc6f-5293506ccc0c')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "SSH - Potential Brute Force",
+                "description": "Identifies an IP address that had 15 failed attempts to sign in via SSH in a 4 hour block during a 24 hour time period.",
+                "severity": "Low",
+                "enabled": true,
+                "query": "let threshold = 15;\nSyslog\n| where SyslogMessage contains \"Failed password for invalid user\"\n| where ProcessName =~ \"sshd\" \n| parse kind=relaxed SyslogMessage with * \"invalid user\" user \" from \" ip \" port\" port \" ssh2\"\n| project user, ip, port, SyslogMessage, EventTime\n| summarize EventTimes = make_list(EventTime), PerHourCount = count() by ip, bin(EventTime, 4h), user\n| where PerHourCount > threshold\n| mvexpand EventTimes\n| extend EventTimes = tostring(EventTimes) \n| summarize StartTimeUtc = min(EventTimes), EndTimeUtc = max(EventTimes), UserList = makeset(user), sum(PerHourCount) by IPAddress = ip\n| extend UserList = tostring(UserList) \n| extend timestamp = StartTimeUtc, IPCustomEntity = IPAddress, AccountCustomEntity = UserList",
+                "queryFrequency": "P1D",
+                "queryPeriod": "P1D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": "e1ce0eab-10d1-4aae-863f-9a383345ba88",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "AccountCustomEntity"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "IPCustomEntity"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        }
+    ]
+}

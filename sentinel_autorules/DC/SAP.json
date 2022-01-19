@@ -1,0 +1,1014 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/b5491c77-9211-4830-bfda-92c1bfcfa2cc')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/b5491c77-9211-4830-bfda-92c1bfcfa2cc')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - HANA DB - Assign Admin Authorizations",
+                "description": "Identifies admin privileges/roles assignment.\n\nSource Action: Assign a user with any Admin role / privileges.\n\n*Data Sources: Linux Agent - Syslog*",
+                "severity": "High",
+                "enabled": true,
+                "query": "Syslog \r\n| where ProcessName startswith \"HDB\"\r\n| where SyslogMessage contains \"ADMIN\" and (SyslogMessage contains \"GRANT PRIVILEGE\" or SyslogMessage contains \"GRANT ROLE\")",
+                "queryFrequency": "PT3H",
+                "queryPeriod": "PT3H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ef382744-672a-4919-86ab-3f75dadf3202')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ef382744-672a-4919-86ab-3f75dadf3202')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - HANA DB - Audit Trail Policy Changes",
+                "description": "Identifies changes for HANA DB audit trail policies.\n\nSource Action: Create / update existing audit policy in security definitions.\n\n*Data Sources: Linux Agent - Syslog*",
+                "severity": "High",
+                "enabled": true,
+                "query": "Syslog \r\n| where ProcessName startswith \"HDB\"\r\n| where SyslogMessage contains \"AUDIT POLICY\" ",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "LateralMovement",
+                    "DefenseEvasion",
+                    "Persistence"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/22b75c95-77a0-4b21-8bdd-3901fe97f232')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/22b75c95-77a0-4b21-8bdd-3901fe97f232')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - HANA DB - Deactivation of Audit Trail",
+                "description": "Identifies deactivation of HANA DB audit log.\n\nSource Action: Deactivate Audit Log in HANA DB security defnitions.\n\n*Data Sources: Linux Agent - Syslog*",
+                "severity": "High",
+                "enabled": true,
+                "query": "Syslog \r\n| where ProcessName startswith \"HDB\"\r\n| where SyslogMessage contains \"AUDIT CONFIGURATION\" and \r\n    SyslogMessage contains 'global_auditing_state' and \r\n    SyslogMessage contains 'False'",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Persistence",
+                    "LateralMovement",
+                    "DefenseEvasion"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/baa2f2a1-64c5-4804-8e40-fe4864a26cf1')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/baa2f2a1-64c5-4804-8e40-fe4864a26cf1')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - HANA DB - User Admin actions",
+                "description": "Identifies user administration actions.\n\nSouirce Action: Create/Update/Delete a DB User.\n\n*Data Sources: Linux Agent - Syslog*",
+                "severity": "High",
+                "enabled": true,
+                "query": "Syslog \r\n| where ProcessName startswith \"HDB\"\r\n| where SyslogMessage contains \"CREATE USER\" or \r\n    SyslogMessage contains 'ALTER USER' or \r\n    SyslogMessage contains 'DROP USER' or \r\n    SyslogMessage contains 'DROP SCHEMA'",
+                "queryFrequency": "PT3H",
+                "queryPeriod": "PT3H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/08e282cf-ab3f-4dae-8b08-bf31c83ed460')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/08e282cf-ab3f-4dae-8b08-bf31c83ed460')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - Deactivation of Security Audit Log",
+                "description": "Identifies deactivation of Security Audit Log\n\nSource Action: Disable secruity Audit Log using SM19/RSAU_CONFIG.\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "High",
+                "enabled": false,
+                "query": "// Audit Log Classes - Audit Log Active Status Events\r\nlet AuditClasses = dynamic(['AUJ']);\r\nABAPAuditLog_CL \r\n| where MessageID_s in (AuditClasses)\r\n| where Variable1_s == '0' // Audit Active Status = 0\r\n| project \r\n// Details\r\nTimeGenerated, Instance_s ,SystemID_s, ClientID_s, User_s, MessageText_s, Email_s, TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Exfiltration",
+                    "DefenseEvasion",
+                    "Persistence"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_User": "User_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_Instance": "Instance_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/928a9636-241b-496e-ae8b-3f5fab96d88d')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/928a9636-241b-496e-ae8b-3f5fab96d88d')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - Login from unexpected network",
+                "description": "Identifies logons from an unexpected network.\n\nSource Action: Logon to the backend system from an IP address which is not assigned to one of the netwroks.\n\nNetworks should be maintained in watchlist \"SAP - Networks\"\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "High",
+                "enabled": false,
+                "query": "let AuditClasses = dynamic(['AU1','AU5']); // Audit Log Classes - Dialog Logon Successful, RFC Logon Successful\r\n// Dialog / CPIC / RFC Int / RFC Ext / SRFC / User Switch / HTTP / Restore Session / API Call\r\nlet DialogLogonTypes = dynamic(['A', 'C', 'F', 'R', 'S', 'U', 'H', 'u', ' ']);\r\nlet Networks = _GetWatchlist('SAP - Networks'); \r\nlet fixedNetworks = datatable(Network: string)['111.68.128.0/17']; // Maintain these if watchlist is not available\r\nlet allNetworks = union Networks, fixedNetworks\r\n    | summarize by Network;\r\nABAPAuditLog_CL\r\n// Add audit classes\r\n| where MessageID_s in (AuditClasses)\r\n| where Variable1_s in (DialogLogonTypes) // Is a dialog logon type from the list\r\n| where isnotempty(TerminalIPv6_s) // There is a Ipv6 address\r\n| evaluate ipv4_lookup(allNetworks, TerminalIPv6_s, Network, return_unmatched = true)\r\n// Similar to regular lookup, by ipv4 address, unmatched is like left join\r\n| where isempty(Network) // Network is not familiar\r\n// Details\r\n| project TimeGenerated, SystemID_s, ClientID_s, User_s, TransactionCode_s, MessageText_s, Email_s , TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_Client": "ClientID_s",
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_User": "User_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/18583265-eac4-4348-9c88-393d90948777')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/18583265-eac4-4348-9c88-393d90948777')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - RFC Execution of a Sensitive Function Module",
+                "description": "Identifies execution of a sensitive function module using RFC.\n\nSource Action: Execute a function module using RFC.\n\n**Recommended for Production only**\n\nFunction Modules should be maintained in watchlist \"SAP - Sensitive Function Modules\"\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "High",
+                "enabled": false,
+                "query": "let Role = \"Production\";\r\nlet AuditClasses = dynamic(['AUK']); // Audit Log Classes - Successful RFC call &C (function group = &A)\r\nlet allSystemRoles = dynamic(['Sandbox', 'Developement', 'QualityAssurance', 'Training', 'Production']); // Available System Roles\r\nlet allSystemUsage = dynamic (['ERP', 'CRM', 'BW', 'Solman', 'Gateway', 'Enterprise Portal']); // Available System Usages\r\n// Get Relevant Systems from WatchList\r\nlet systemID = _GetWatchlist('SAP - Systems');\r\nlet fixedSID = datatable(SystemID: string, SystemRole: string, SystemUsage: string)\r\n    // Maintain these if WatchList is not available    \r\n    [\"S4H\", \"Production\", \"ERP\",\r\n    \"XXX\", \"Sandbox\", \"BW\"]\r\n; \r\n// Get Relevant Function Modules\r\nlet SensitiveFM = _GetWatchlist('SAP - Sensitive Function Modules');\r\nlet fixedFM = datatable(FunctionModule: string)\r\n    // Maintain these if WatchList is not available    \r\n    [\"RSAU_CLEAR_AUDIT_LOG\"]\r\n; \r\nlet UnitedSystems = union systemID, fixedSID\r\n| where SystemRole == Role // Recommended  is Production only\r\n| summarize by SystemID;\r\n//| where SystemRole in (allSystemRoles); // Use this for all system roles\r\nlet UnitedSensitive =  union SensitiveFM, fixedFM\r\n| summarize by FunctionModule;\r\nABAPAuditLog_CL \r\n| where MessageID_s in (AuditClasses)\r\n| project-rename FunctionModule = Variable3_s, FunctionGroup = Variable1_s\r\n| where SystemID_s in (UnitedSystems) // The systemID is in this list\r\n| where FunctionModule in (UnitedSensitive) // Function module is sensitive\r\n| order by TimeGenerated asc\r\n| project TimeGenerated,Instance_s ,User_s, SystemID_s, ClientID_s, MessageText_s, FunctionGroup, FunctionModule, MessageID_s, Email_s, TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT2H",
+                "queryPeriod": "PT2H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Execution",
+                    "LateralMovement",
+                    "Discovery"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_User": "User_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_Instance": "Instance_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/3d3173ce-3ff4-476e-9c94-d2979827fc2c')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/3d3173ce-3ff4-476e-9c94-d2979827fc2c')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - Sensitive Users Password Change and Login",
+                "description": "Identifies password changes for privileged users.\n\nSource Action: Change Password for a user and login to the system.\n\nPriveleged users should be maintained in \"SAP - Privileged Users\" Watchlist\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "High",
+                "enabled": false,
+                "query": "// Define variables\r\nlet ChangeAndLoginThreshold = 5; // Difference by minutes between Change in user to connect\r\nlet LoginAndRestThreshold = 3; // Difference by minutes between Connect and password reset\r\nlet AuditUserChange = dynamic(['AUD']); // Message of change in user\r\nlet AuditLogIn = dynamic(['AU1', 'AU5']); // Messages of connect with user\r\nlet AuditUserPassReset = dynamic(['BU2']); // Message of user password change\r\nlet PrivUsers = _GetWatchlist(\"SAP - Privileged Users\");\r\nlet fixedUsers = datatable(User: string)\r\n    // Maintain these if WatchList is not available    \r\n    [\"SAP*\", \"DDIC\"]\r\n;\r\nlet SensProfiles = _GetWatchlist('SAP - Sensitive Profiles') | summarize  by Profile;\r\nlet SensRoles = _GetWatchlist('SAP - Sensitive Roles') | summarize  by Role;\r\n// Maintain these if System doesn't have CR's\r\nlet FixedUserMD = datatable(TimeGenerated : datetime, UserName_s : string, RoleMembership_s : string)[];\r\n// Priveleged Users by sensitive role/profile based on user master data\r\nlet ABAPUserMd = \r\nunion isfuzzy=true table(\"ABAPUserMD_CL\"), FixedUserMD;\r\nlet PrivUserdByMD = ABAPUserMd\r\n| extend Roles = parse_json(RoleMembership_s)[\"SapRole\"], Profiles = parse_json(RoleMembership_s)[\"SapProfile\"]\r\n| mv-expand Roles, Profiles\r\n| where Roles in (SensRoles) or Profiles in (SensProfiles)\r\n| summarize by User = UserName_s;\r\nlet UnitedPrivleged = toscalar(union PrivUsers, fixedUsers, PrivUserdByMD\r\n| summarize Users = make_set(User));\r\n// Query Logic\r\nlet UserChange = // Get users change activity\r\nABAPAuditLog_CL\r\n| where MessageID_s in (AuditUserChange)\r\n| where Variable1_s in (UnitedPrivleged) // The user with the changed password is privileged user\r\n| project-rename UserChangeTimeGenerated = TimeGenerated, UserPassChanged = Variable1_s;\r\nlet UserLogIn = // Get users connections\r\nABAPAuditLog_CL\r\n| where MessageID_s in (AuditLogIn)\r\n| project-rename UserLogInTimeGenerated = TimeGenerated;\r\nABAPAuditLog_CL // Get users password reset\r\n| where MessageID_s in (AuditUserPassReset)\r\n| where User_s in (UnitedPrivleged) // The user with the changed password is privileged user\r\n| lookup kind=inner UserLogIn on TerminalIPv6_s, User_s // Lookup of user reset to user login\r\n| lookup kind=inner UserChange on TerminalIPv6_s, $left.User_s == $right.UserPassChanged // Lookup of user reset to user change\r\n| where abs(datetime_diff('Minute', UserChangeTimeGenerated, UserLogInTimeGenerated)) <= ChangeAndLoginThreshold // Connect after a change in user\r\n| where abs(datetime_diff('Minute', TimeGenerated, UserLogInTimeGenerated)) <= LoginAndRestThreshold // Change password after connection\r\n| summarize by TimeGenerated, Instance_s ,SystemID_s, ClientID_s, UserAction = User_s1, PrivUserPassChanged = User_s, Email_s, TerminalIPv6_s, Host_s\r\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Impact",
+                    "CommandAndControl",
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_Instance": "Instance_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_User": "UserAction"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/3ddadc6d-3861-4c3c-9dbb-604fe2a25eaf')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/3ddadc6d-3861-4c3c-9dbb-604fe2a25eaf')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - High - User Unlocks and uses other users",
+                "description": "Identifies a user unlock and usage by other users.\n\nSource Action: Unlock a user using SU01. Login using the unlocked user from the same IP.\n\n*Data Sources: SAPcon -  Audit Log*\n*Data Sources: SAPcon -  Change Documents Log*",
+                "severity": "High",
+                "enabled": false,
+                "query": "// Define variables\r\nlet MinutesThreshold = 15; // Difference by minutes between Unlock and Connect\r\nlet AuditUserUnlocked = dynamic(['AUA']); // Message of unlock user\r\nlet AuditLogIn = dynamic(['AU1', 'AU5']); // Messages of connect with user\r\n// Query Logic\r\nlet UserUnlocked = // Get users unlocked\r\nABAPAuditLog_CL\r\n| where MessageID_s in (AuditUserUnlocked)\r\n| project-rename UserUnlockTimeGenerated = TimeGenerated, UserUnlocked = Variable1_s;\r\nABAPAuditLog_CL // Get users connections\r\n| where MessageID_s in (AuditLogIn)\r\n| lookup kind=inner UserUnlocked on TerminalIPv6_s, $left.User_s == $right.UserUnlocked // Lookup of user unlocked to user log in\r\n| where abs(datetime_diff('Minute', TimeGenerated, UserUnlockTimeGenerated)) <= MinutesThreshold // Connect after unlock\r\n| summarize by TimeGenerated, Instance_s ,SystemID_s, ClientID_s, UserAction = User_s1, UserUnlocked = User_s, Email_s,  TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "Discovery",
+                    "LateralMovement"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_Instance": "Instance_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_User": "UserAction"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/54dd5975-7cc1-45c4-b9c6-5ef71795470c')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/54dd5975-7cc1-45c4-b9c6-5ef71795470c')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - Medium - Brute force attacks",
+                "description": "Identifies brute force attacks on SAP system according to failed logon attempts for the backend system.\n\nSource Action: Attempt to login from the same IP to several systems/clients within the scheduled time interval.\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "// Define variables\r\n// Audit Log Classes - Failed Logons / Password Check\r\nlet AuditClasses = dynamic(['AUO', 'AU2', 'AU6', 'BU1']);\r\nlet perIPLimit = 6;\r\n// Query logic\r\nABAPAuditLog_CL \r\n| where MessageID_s in (AuditClasses)\r\n| extend DetailsBy = pack(\"User\", User_s, \"Email\", Email_s, \"SystemID\", SystemID_s, \"ClientID\", ClientID_s)\r\n| summarize LoginbyIPAttempts = count(), Details = make_set(DetailsBy), StartTime = min(TimeGenerated), EndTime = max(TimeGenerated) \r\n    by TerminalIPv6_s\r\n// Check if number of login attempts per IP is higher than limit\r\n| where LoginbyIPAttempts > perIPLimit \r\n| mv-expand Details\r\n| evaluate bag_unpack(Details, \"Details_\")\r\n| project \r\n    StartTime, EndTime,  TerminalIPv6_s,\r\n    Email = column_ifexists(\"Details_Email\", \"\"), User = column_ifexists(\"Details_User\", \"\"),\r\n    SysetmID = column_ifexists(\"Details_SystemID\", \"\"),\r\n   ClientID = column_ifexists(\"Details_ClientID\", \"\")",
+                "queryFrequency": "PT6H",
+                "queryPeriod": "PT6H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_User": "User",
+                    "SAP_Client": "ClientID",
+                    "SAP_System_I_D": "SysetmID"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/ffbc73c4-b0f3-4177-823e-2d55f6ddfa59')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/ffbc73c4-b0f3-4177-823e-2d55f6ddfa59')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - Medium - Critical authorizations assignment - New User Assignment",
+                "description": "Identifies assignment of a critical authorization object value to a new user.\n\nSource Action: Assign a new user to a role which holds critical authorization values using SU01/PFCG.\n\nCritical authorization objects should be maintained in watchlist \"\"SAP - Critical Authorization Objects\"\"\n\n*Data Sources: SAPcon -  Change Documents Log*",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "// New Assigned Users\r\nlet ObjectClassRoles = 'PFCG';\r\nlet TableName = 'CD1251';\r\nlet UsersRoles = 'AGR_USERS';\r\nlet Insert = \"I\";\r\nlet NotInUse = 'NOT_IN_USE';\r\nlet logsThreshold = 3; // 3 seconds\r\n// Audit Log Classes - Authorizations for user changed\r\nlet AuditClasses = dynamic(['AUB','AUD']); // Authorizations for user &A changed. User Master Record Changed\r\n// Roles Change Documents - Extract Auth Object and Obj Field\r\nlet allHistory = ago(0d);\r\nlet alertSched = ago(6h); // Please maintain according to schedule\r\n// Maintain these if System doesn't have CR's\r\nlet fixedChangeDocs = datatable(User_s : string, ObjectClass_s : string, TableName_s : string, TypeofChange_Item_s : string , ChangedTableKey_s : string, ObjectID_s : string, TimeGenerated : datetime, ValueNew_s : string, SystemID_s : string)[];\r\nlet ChangeDocs = \r\nunion isfuzzy=true table(\"ABAPChangeDocsLog_CL\"), fixedChangeDocs;\r\nlet RolesAuthObject = ChangeDocs  \r\n    | where TimeGenerated <= allHistory\r\n    | where ObjectClass_s == ObjectClassRoles and TableName_s == TableName // Role-Obj-Profile-ObjField\r\n    | where TypeofChange_Item_s in ('J', 'I', 'U') //  Insert\r\n    | extend RoleObjProfileObjFieldVer = ChangedTableKey_s, Role = ObjectID_s\r\n    | extend ObjFieldValue = ValueNew_s    \r\n    | extend ObjField = trim(@\"\\s*?\", extract(@\"(^.{1,30})\\s*?(.{1,10})\\s*?(.{1,12})\\s*?(.{1,10})\\s*?\\d{6}\", 4, RoleObjProfileObjFieldVer, typeof(string)))\r\n    | extend AuthObject = trim(@\"\\s*?\", extract(@\"(^.{1,30})\\s*?(.{1,10})\\s*?(.{1,12})\\s*?(.{1,10})\\s*?\\d{6}\", 2, RoleObjProfileObjFieldVer, typeof(string)))\r\n    | summarize by SystemID_s, Role, AuthObject, ObjField, ObjFieldValue;\r\nlet ComplexAuth = _GetWatchlist('SAP - Critical Authorizations');\r\nlet SimpleAuth = _GetWatchlist('SAP - Critical Authorizations');\r\nlet fixedComplexAuth = datatable(AuthorizationObject: string, AuthorizationField: string, AuthorizationValue: string, ActivityField: string, Activity: string)\r\n    ['S_DEVELOP', 'OBJTYPE', 'DEBUG', 'ACTVT', '*',\r\n    'S_DEVELOP', 'OBJTYPE', 'DEBUG', 'ACTVT', '02']; // Maintain these if WatchList is not available\r\nlet fixedSimpleAuth = datatable(AuthorizationObject: string, AuthorizationField: string, AuthorizationValue: string, ActivityField: string, Activity: string)\r\n    ['S_TCODE', 'TCD', '*', 'NOT_IN_USE', '',\r\n    'S_TZONE', 'ACTVT', '*', 'NOT_IN_USE', '']; // Maintain these if WatchList is not available\r\nlet usersinRole = \r\n    ChangeDocs  \r\n    | where TimeGenerated >= alertSched\r\n    | where ObjectClass_s == ObjectClassRoles // Roles\r\n        and TableName_s == UsersRoles // Users Roles\r\n        and TypeofChange_Item_s == Insert // Insert \r\n    | extend UserAssigned = extract(@\"^.{1,33}\\s*?(.{1,12})\\s*?\\d{16}\", 1, ChangedTableKey_s)\r\n    | extend Role = ObjectID_s\r\n    | extend TimeGenUserinRole = TimeGenerated;\r\n    //| summarize by TimeGenerated, SystemID_s, ClientID_s, Role, UserAssigned, User_s\r\nlet RolesAuthObjectCheck =     \r\n        RolesAuthObject     \r\n        | extend ObjFieldVal = ObjFieldValue\r\n        | lookup kind = leftouter \r\n            (RolesAuthObject \r\n            | extend ActivityVal = ObjFieldValue)\r\n            on Role, AuthObject;\r\nlet complexScenario = \r\n    union ComplexAuth, fixedComplexAuth\r\n    | where ActivityField != NotInUse\r\n    | summarize by AuthorizationObject, AuthorizationField, AuthorizationValue, ActivityField, Activity\r\n    | lookup kind = inner (RolesAuthObjectCheck)\r\n        on $left.AuthorizationObject == $right.AuthObject \r\n        and $left.AuthorizationField == $right.ObjField \r\n        and $left.AuthorizationValue == $right.ObjFieldValue\r\n        and $left.ActivityField == $right.ObjField1\r\n        and $left.Activity == $right.ActivityVal;\r\nlet simpleScenario = \r\n    union SimpleAuth, fixedSimpleAuth\r\n    | where ActivityField == NotInUse\r\n    | summarize by AuthorizationObject, AuthorizationField, AuthorizationValue, ActivityField, Activity \r\n    | lookup kind = inner (RolesAuthObject)\r\n        on $left.AuthorizationObject == $right.AuthObject \r\n        and $left.AuthorizationField == $right.ObjField \r\n        and $left.AuthorizationValue == $right.ObjFieldValue;\r\nlet GetEntites =     \r\n    ABAPAuditLog_CL \r\n    | where TimeGenerated >= alertSched\r\n    | where MessageID_s in (AuditClasses)\r\n    | summarize by TimeGenerated, TerminalIPv6_s, ClientID_s, User_s, Host_s, Email_s\r\n    | extend TimeGenAudit = TimeGenerated;  \r\nunion complexScenario, simpleScenario\r\n| lookup kind = inner (usersinRole) on SystemID_s, Role\r\n| lookup kind = leftouter (GetEntites) on User_s\r\n| where abs(datetime_diff('second', TimeGenUserinRole, TimeGenAudit)) <= logsThreshold or\r\nisnull(TimeGenAudit)\r\n| project \r\n    // Details\r\nTimeGenUserinRole , SystemID_s, ClientID_s, Role, User_s, UserAssigned, AuthorizationObject, AuthorizationField, AuthorizationValue, ActivityField, Activity, Email_s, TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT6H",
+                "queryPeriod": "PT6H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_Client": "ClientID_s",
+                    "SAP_User": "User_s",
+                    "SAP_System_I_D": "SystemID_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c586de99-896b-4749-9c2b-f3373b8ab3d1')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c586de99-896b-4749-9c2b-f3373b8ab3d1')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - Medium - Critical authorizations assignment - New Authorization Value",
+                "description": "Identifies assignment of a critical authorization object value to a new user.\n\nSource Action: Assign a new authorization object / update existing one in a role using PFCG.\n\nCritical authorization objects should be maintained in watchlist \"\"SAP - Critical Authorization Objects\"\"\n\n*Data Sources: SAPcon -  Change Documents Log*",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "// New Assigned Objects\r\nlet ObjectClassRoles = 'PFCG';\r\nlet TableName = 'CD1251';\r\nlet UsersRoles = 'AGR_USERS';\r\nlet Insert = \"I\";\r\nlet NotInUse = 'NOT_IN_USE';\r\nlet logsThreshold = 3; // 3 seconds\r\n// Audit Log Classes - Authorizations for user changed\r\nlet AuditClasses = dynamic(['AUR','AUT']); // Authorization/Authorization Profile &B created / changed.\r\n// Roles Change Documents - Extract Auth Object and Obj Field\r\nlet allHistory = ago(0d);\r\nlet alertSched = ago(6h); // Please maintain according to schedule\r\n// Maintain these if System doesn't have CR's\r\nlet fixedChangeDocs = datatable(User_s : string, ObjectClass_s : string, TableName_s : string, TypeofChange_Item_s : string , ChangedTableKey_s : string, ObjectID_s : string, TimeGenerated : datetime, ValueNew_s : string, SystemID_s : string)[];\r\nlet ChangeDocs = \r\nunion isfuzzy=true table(\"ABAPChangeDocsLog_CL\"), fixedChangeDocs;\r\nlet RolesAuthObject = ChangeDocs  \r\n    | where TimeGenerated >= alertSched\r\n    | where ObjectClass_s == ObjectClassRoles and TableName_s == TableName // Role-Obj-Profile-ObjField\r\n    | where TypeofChange_Item_s in ('J', 'I', 'U') //  Insert\r\n    | extend RoleObjProfileObjFieldVer = ChangedTableKey_s, Role = ObjectID_s\r\n    | extend ObjFieldValue = ValueNew_s    \r\n    | extend ObjField = trim(@\"\\s*?\", extract(@\"(^.{1,30})\\s*?(.{1,10})\\s*?(.{1,12})\\s*?(.{1,10})\\s*?\\d{6}\", 4, RoleObjProfileObjFieldVer, typeof(string)))\r\n    | extend AuthObject = trim(@\"\\s*?\", extract(@\"(^.{1,30})\\s*?(.{1,10})\\s*?(.{1,12})\\s*?(.{1,10})\\s*?\\d{6}\", 2, RoleObjProfileObjFieldVer, typeof(string)))\r\n    | extend TimeGenRoleAuth = TimeGenerated;\r\nlet ComplexAuth = _GetWatchlist('SAP - Critical Authorizations');\r\nlet SimpleAuth = _GetWatchlist('SAP - Critical Authorizations');\r\nlet fixedComplexAuth = datatable(AuthorizationObject: string, AuthorizationField: string, AuthorizationValue: string, ActivityField: string, Activity: string)\r\n    ['S_DEVELOP', 'OBJTYPE', 'DEBUG', 'ACTVT', '*',\r\n    'S_DEVELOP', 'OBJTYPE', 'DEBUG', 'ACTVT', '02']; // Maintain these if WatchList is not available\r\nlet fixedSimpleAuth = datatable(AuthorizationObject: string, AuthorizationField: string, AuthorizationValue: string, ActivityField: string, Activity: string)\r\n    ['S_TCODE', 'TCD', '*', 'NOT_IN_USE', '',\r\n    'S_TZONE', 'ACTVT', '*', 'NOT_IN_USE', '']; // Maintain these if WatchList is not available\r\nlet usersinRole = \r\n    ChangeDocs  \r\n    | where TimeGenerated <= allHistory\r\n    | where ObjectClass_s == ObjectClassRoles // Roles\r\n        and TableName_s == UsersRoles // Users Roles\r\n        and TypeofChange_Item_s == Insert // Insert \r\n    | extend UserAssigned = extract(@\"^.{1,33}\\s*?(.{1,12})\\s*?\\d{16}\", 1, ChangedTableKey_s)\r\n    | extend Role = ObjectID_s\r\n    | summarize by SystemID_s, Role, UserAssigned;\r\nlet RolesAuthObjectCheck =     \r\n        RolesAuthObject     \r\n        | extend ObjFieldVal = ObjFieldValue\r\n        | lookup kind = leftouter \r\n            (RolesAuthObject \r\n            | extend ActivityVal = ObjFieldValue)\r\n            on Role, AuthObject;\r\nlet complexScenario = union ComplexAuth, fixedComplexAuth\r\n    | where ActivityField != NotInUse\r\n    | summarize by AuthorizationObject, AuthorizationField, AuthorizationValue, ActivityField, Activity\r\n    | lookup kind = inner (RolesAuthObjectCheck)\r\n        on $left.AuthorizationObject == $right.AuthObject \r\n        and $left.AuthorizationField == $right.ObjField \r\n        and $left.AuthorizationValue == $right.ObjFieldValue\r\n        and $left.ActivityField == $right.ObjField1\r\n        and $left.Activity == $right.ActivityVal;\r\nlet simpleScenario = \r\n    union SimpleAuth, fixedSimpleAuth\r\n    | where ActivityField == NotInUse\r\n    | summarize by AuthorizationObject, AuthorizationField, AuthorizationValue, ActivityField, Activity \r\n    | lookup  kind = inner (RolesAuthObject)\r\n        on $left.AuthorizationObject == $right.AuthObject \r\n        and $left.AuthorizationField == $right.ObjField \r\n        and $left.AuthorizationValue == $right.ObjFieldValue;\r\nlet GetEntities =\r\n    ABAPAuditLog_CL \r\n    | where MessageID_s in (AuditClasses)\r\n    | summarize by TimeGenerated, ClientID_s, TerminalIPv6_s, User_s, Host_s, Email_s\r\n    | extend TimeGenAudit = TimeGenerated;\r\nunion complexScenario, simpleScenario\r\n| lookup kind = inner (usersinRole) on SystemID_s, Role\r\n| lookup kind = leftouter (GetEntities) on User_s\r\n| where abs(datetime_diff('second', TimeGenRoleAuth, TimeGenAudit)) <= logsThreshold or\r\nisnull(TimeGenAudit)\r\n| project \r\n    // Details\r\nTimeGenRoleAuth, SystemID_s, ClientID_s, Role, User_s, UserAssigned, AuthorizationObject, AuthorizationField, AuthorizationValue, ActivityField, Activity, Email_s, TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT6H",
+                "queryPeriod": "PT6H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_User": "User_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/113c5f42-173e-43cd-88e9-b8515b445b4e')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/113c5f42-173e-43cd-88e9-b8515b445b4e')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - Medium - Insecure FTP servers configuration",
+                "description": " Identifies Insecure FTP servers configuration - FTP Whitelist is empty / Contains Placeholders.\n\nSource Action: Do not maintain / maintain values which contains placeholders in table SAPFTP_SERVERS using maintenance view SAPFTP_SERVERS_V. (SM30)\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "// Define variables\r\nlet AuditClasses = dynamic(['DU1', 'DU2']); // Messages of FTP Whitelist is empty / Contains Placeholders\r\n// Query logic\r\nABAPAuditLog_CL\r\n| where MessageID_s in (AuditClasses)\r\n| project TimeGenerated, Instance_s, SystemID_s, ClientID_s, User_s, Email_s, TerminalIPv6_s, Host_s, Reason = MessageText_s",
+                "queryFrequency": "PT6H",
+                "queryPeriod": "PT6H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess",
+                    "CommandAndControl"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_Instance": "Instance_s",
+                    "SAP_User": "User_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c7f2b9d0-548f-4ac1-8551-d798ce3a76a8')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c7f2b9d0-548f-4ac1-8551-d798ce3a76a8')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - Medium - Multiple Files Download",
+                "description": "Identifies multiple files downloads for a user within a specific timerange.\n\nSource Action: Download multiple files while using SAPGui to Excel/Lists etc.\n\n*Data Sources: SAPcon -  Audit Log*",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "// Define variables\r\nlet NumberOfDownloads = 10; // Number of downloads of user as threshold\r\nlet HoursBucket = 2h; // How much time between buckets\r\nlet AuditClasses = dynamic([\"AUY\"]); // Relevant message\r\n// Query logic\r\nABAPAuditLog_CL // Get all downloads\r\n| where MessageID_s in (AuditClasses)\r\n| summarize DownloadsByUser = count() by bin(TimeGenerated, HoursBucket), SystemID_s, ClientID_s, User_s, TerminalIPv6_s, Email_s, Host_s\r\n| where DownloadsByUser >= NumberOfDownloads // User downloaded more than threshold\r\n| project SystemID_s, ClientID_s, User_s, Email_s, TerminalIPv6_s, Host_s,DownloadsByUser",
+                "queryFrequency": "PT12H",
+                "queryPeriod": "PT12H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Collection",
+                    "Exfiltration",
+                    "CredentialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_User": "User_s",
+                    "SAP_Client": "ClientID_s",
+                    "SAP_System_I_D": "SystemID_s"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/863a0c76-14d1-464b-96f4-c57795062f63')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/863a0c76-14d1-464b-96f4-c57795062f63')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "(Preview) SAP - Medium - Spool Takeover",
+                "description": "Identifies a user printing a spool request which was created by someone else.\n\nSource Action: Create a Spool Request using one user, Output it in using another user.\n\n*Data Sources: SAPcon -  Spool Log*\n*Data Sources: SAPcon -  Spool Output Log*",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "// Define variables\r\nlet AuditLogIn = dynamic(['AU1', 'AU5']); // Messages of connect with user\r\n// Query logic\r\nlet LastLogin = \r\nABAPAuditLog_CL\r\n| where MessageID_s in (AuditLogIn)\r\n| summarize TimeGenerated = arg_max(TimeGenerated, *) by SystemID_s, ClientID_s, User_s; // Get last connection date for user\r\n// Query Logic\r\nABAPSpoolOutputLog_CL // Get all spool outputs\r\n| lookup kind=inner ABAPSpoolLog_CL on SpoolRequestNumber_d\r\n| lookup kind=inner LastLogin on User_s\r\n| where User_s != User_s1 // The user that created the request is not the one that printed it\r\n| project TimeGenerated, Instance_s, SystemID_s, ClientID_s, UserCreated = User_s1, UserPrinted = User_s, SpoolRequestNumber_d, Email_s, TerminalIPv6_s, Host_s",
+                "queryFrequency": "PT12H",
+                "queryPeriod": "PT12H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Collection",
+                    "Exfiltration",
+                    "CommandAndControl"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": null,
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "SAP_Client": "ClientID_s",
+                    "SAP_Instance": "Instance_s",
+                    "SAP_System_I_D": "SystemID_s",
+                    "SAP_User": "UserPrinted"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Email_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "IP",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Address",
+                                "columnName": "TerminalIPv6_s"
+                            }
+                        ]
+                    },
+                    {
+                        "entityType": "Host",
+                        "fieldMappings": [
+                            {
+                                "identifier": "FullName",
+                                "columnName": "Host_s"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,71 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/34e4c326-e1ba-4fb4-969b-94e9adc0acf4')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/34e4c326-e1ba-4fb4-969b-94e9adc0acf4')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "AWS Guard Duty Alert",
+                "description": "Amazon GuardDuty is a threat detection service that continuously monitors your AWS accounts and workloads for malicious activity and delivers detailed security findings for visibility and remediation. This templates create an alert for each Amazon GuardDuty finding.",
+                "severity": "Medium",
+                "enabled": true,
+                "query": "AWSGuardDuty | extend tokens = split(ActivityType,\":\") | extend ThreatPurpose = tokens[0], tokens= split(tokens[1],\"/\") | extend ResourceTypeAffected = tokens[0], ThreatFamilyName= tokens[1] | extend UniqueFindingId = Id | extend AWSAcoundId = AccountId | project-away tokens,ActivityType, Id, AccountId | project-away TimeGenerated, TenantId, SchemaVersion, Region, Partition | extend Severity= iff(Severity between (7.0..8.9),\"High\",iff(Severity between (4.0..6.9), \"Medium\", iff(Severity between (1.0..3.9),\"Low\",\"Unknown\")))",
+                "queryFrequency": "PT5H",
+                "queryPeriod": "PT5H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT5H",
+                "suppressionEnabled": false,
+                "tactics": [],
+                "techniques": [],
+                "alertRuleTemplateName": "bf0cde21-0c41-48f6-a40c-6b5bd71fa106",
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5H",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": [],
+                        "groupByCustomDetails": []
+                    }
+                },
+                "eventGroupingSettings": {
+                    "aggregationKind": "SingleAlert"
+                },
+                "alertDetailsOverride": null,
+                "customDetails": {
+                    "ThreatPurpos": "ThreatPurpose",
+                    "ResourceTypeAffected": "ResourceTypeAffected",
+                    "UniqueFindingId": "UniqueFindingId"
+                },
+                "entityMappings": [
+                    {
+                        "entityType": "Account",
+                        "fieldMappings": [
+                            {
+                                "identifier": "Name",
+                                "columnName": "Arn"
+                            },
+                            {
+                                "identifier": "ObjectGuid",
+                                "columnName": "AWSAcoundId"
+                            }
+                        ]
+                    }
+                ],
+                "templateVersion": "1.0.0"
+            }
+        }
+    ]
+}

@@ -1,0 +1,298 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspace": {
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/c059d740-500f-4731-99fe-0a6a9769a27f')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/c059d740-500f-4731-99fe-0a6a9769a27f')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - Forbidden file type downloaded",
+                "description": "Detects when new user downloads forbidden file types.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let forbidden_files = dynamic(['ps1', 'bat', 'scr', 'sh']);\nBoxEvents\n| where EventType =~ 'DOWNLOAD'\n| extend file_type = extract(@'\\.(\\w+)$', 1, SourceItemName)\n| where file_type in (forbidden_files)\n| extend AccountCustomEntity = SrcUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/09532815-15fa-468c-a926-481309ef4661')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/09532815-15fa-468c-a926-481309ef4661')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - File containing sensitive data",
+                "description": "Detects files which potentialy may contain sensitive data such as passwords, authentication tokens, secret keys.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "BoxEvents\n| where SourceItemName =~ 'id_rsa' or SourceItemName contains 'password' or SourceItemName contains 'key' or SourceItemName contains '_key' or SourceItemName contains '.ssh' or SourceItemName endswith '.npmrc' or SourceItemName endswith '.muttrc' or SourceItemName contains 'config.json' or SourceItemName contains '.gitconfig' or SourceItemName endswith '.netrc' or SourceItemName endswith 'package.json' or SourceItemName endswith 'Gemfile' or SourceItemName endswith 'bower.json' or SourceItemName endswith 'config.gypi' or SourceItemName endswith 'travis.yml' or SourceFileName =~ 'id_rsa' or SourceFileName contains 'password' or SourceFileName contains 'key' or SourceFileName contains '_key' or SourceFileName contains '.ssh' or SourceFileName endswith '.npmrc' or SourceFileName endswith '.muttrc' or SourceFileName contains 'config.json' or SourceFileName contains '.gitconfig' or SourceFileName endswith '.netrc' or SourceFileName endswith 'package.json' or SourceFileName endswith 'Gemfile' or SourceFileName contains 'bower.json' or SourceFileName contains 'config.gypi' or SourceFileName contains 'travis.yml'\n| extend AccountCustomEntity = SrcUserName\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Exfiltration"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/03c373ed-defa-4f58-bda8-89378e31ef73')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/03c373ed-defa-4f58-bda8-89378e31ef73')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - Abmormal user activity",
+                "description": "Detects spikes (deviations from avarage) in user activity.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbperiod_start = 14d;\nlet lbperiod_end = 24h;\nlet user_actions_1 = BoxEvents\n| where TimeGenerated between (ago(lbperiod_start) .. ago(lbperiod_end))\n| summarize TotalEvents = count() by SourceName\n| project TotalEvents, User = SourceName;\nlet user_actions_2 = BoxEvents\n| where TimeGenerated between (ago(lbperiod_start) .. ago(lbperiod_end))\n| summarize TotalEvents = count() by SrcUserName\n| project TotalEvents, User = SrcUserName;\nlet TotalActions = (union user_actions_1, user_actions_2)\n| summarize TotalEvents = count() by User\n| extend EventsPerDay = TotalEvents / 29\n| extend k = 1;\nlet actions1_last_h = BoxEvents\n| summarize TotalEventsH = count() by SourceName\n| project TotalEventsH, User = SourceName;\nlet actions2_last_h = BoxEvents\n| summarize TotalEventsH = count() by SourceName\n| project TotalEventsH, User = SourceName;\nlet TotalActionsLastHour = (union actions1_last_h, actions2_last_h)\n| summarize TotalEventsH = sum(TotalEventsH) by User\n| extend k = 1;\nTotalActions\n| join (TotalActionsLastHour) on k\n| where EventsPerDay > TotalEventsH\n| project User\n| extend AccountCustomEntity = User\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "P14D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Collection"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/0e77369e-f4a3-44aa-8fe2-059671ff6aa1')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/0e77369e-f4a3-44aa-8fe2-059671ff6aa1')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - Item shared to external entity",
+                "description": "Detects when an item was shared to external entity.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "BoxEvents\n| where EventType =~ 'COLLABORATION_INVITE'\n| extend corp_domain = tolower(extract(@'@(.*)', 1, SrcUserUpn))\n| extend accessibleby_domain = tolower(extract(@'@(.*)', 1, AccessibleByLogin))\n| where corp_domain != accessibleby_domain\n| extend AccountCustomEntity = SrcUserUpn\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Exfiltration"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/74896f08-ce61-49a1-b82d-4099e11a7357')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/74896f08-ce61-49a1-b82d-4099e11a7357')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - Executable file in folder",
+                "description": "Detects executable files in folders.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "BoxEvents\n| where SourceFileName hassuffix '.exe' or SourceItemName hassuffix '.exe'\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "InitialAccess"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/a636b298-81c2-48eb-8e53-d725b57d8065')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/a636b298-81c2-48eb-8e53-d725b57d8065')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - Many items deleted by user",
+                "description": "Detects when a user deletes many items in short period of time.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let threshold = 100;\nBoxEvents\n| where EventType =~ 'DELETE'\n| summarize deleted_items = dcount(SourceItemName) by SrcUserName, bin(TimeGenerated, 5m)\n| where deleted_items > threshold\n| extend AccountCustomEntity = SrcUserName\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "PT1H",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "Impact"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        },
+        {
+            "id": "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/6c5b3af4-53e2-4794-9026-ed4f208049a9')]",
+            "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/6c5b3af4-53e2-4794-9026-ed4f208049a9')]",
+            "type": "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind": "Scheduled",
+            "apiVersion": "2021-09-01-preview",
+            "properties": {
+                "displayName": "Box - User logged in as admin",
+                "description": "Detects when user logged in as admin.",
+                "severity": "Medium",
+                "enabled": false,
+                "query": "let lbperiod_start = 14d;\nlet lbperiod_end = 1d;\nlet admins = BoxEvents\n| where TimeGenerated between (ago(lbperiod_start) .. ago(lbperiod_end))\n| where EventType =~ 'ADMIN_LOGIN'\n| summarize makeset(SourceLogin);\nBoxEvents\n| where EventType =~ 'ADMIN_LOGIN'\n| where SourceLogin !in (admins)\n| extend AccountCustomEntity = SourceLogin\n| extend IPCustomEntity = SrcIpAddr\n",
+                "queryFrequency": "PT1H",
+                "queryPeriod": "P14D",
+                "triggerOperator": "GreaterThan",
+                "triggerThreshold": 0,
+                "suppressionDuration": "PT1H",
+                "suppressionEnabled": false,
+                "tactics": [
+                    "PrivilegeEscalation"
+                ],
+                "techniques": [],
+                "alertRuleTemplateName": null,
+                "incidentConfiguration": {
+                    "createIncident": true,
+                    "groupingConfiguration": {
+                        "enabled": false,
+                        "reopenClosedIncident": false,
+                        "lookbackDuration": "PT5M",
+                        "matchingMethod": "AllEntities",
+                        "groupByEntities": [],
+                        "groupByAlertDetails": null,
+                        "groupByCustomDetails": null
+                    }
+                },
+                "eventGroupingSettings": null,
+                "alertDetailsOverride": null,
+                "customDetails": null,
+                "entityMappings": null
+            }
+        }
+    ]
+}
